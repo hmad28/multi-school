@@ -1,0 +1,14 @@
+<script setup lang="ts">
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+const school = computed(() => page.props.school as { slug: string });
+const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
+
+defineProps<{ students: any[]; types: any[] }>();
+const form = useForm({ student_id: '', violation_type_id: '', date: new Date().toISOString().slice(0, 10), note: '', evidence: null as File | null });
+const submit = () => form.post(route('tenant.student-violations.store', tenantParams()));
+</script>
+<template><Head title="Input Pelanggaran" /><AuthenticatedLayout><template #header><p class="page-kicker">Kedisiplinan</p><h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Input Pelanggaran</h1></template><form @submit.prevent="submit" class="app-card max-w-3xl space-y-5 p-6"><div><h2 class="text-lg font-bold text-slate-900">Catat pelanggaran siswa</h2><p class="mt-1 text-sm text-slate-500">Data baru akan pending dan perlu divalidasi BK/Admin.</p></div><label class="block text-sm font-semibold text-slate-700">Siswa<select v-model="form.student_id" class="app-input mt-2 w-full"><option value="">Pilih siswa</option><option v-for="student in students" :key="student.id" :value="student.id">{{ student.full_name }} · {{ student.nis }} · {{ student.school_class?.display_name }}</option></select><p class="mt-1 text-sm text-red-600">{{ form.errors.student_id }}</p></label><label class="block text-sm font-semibold text-slate-700">Jenis Pelanggaran<select v-model="form.violation_type_id" class="app-input mt-2 w-full"><option value="">Pilih jenis</option><option v-for="type in types" :key="type.id" :value="type.id">{{ type.name }} · {{ type.points }} poin</option></select><p class="mt-1 text-sm text-red-600">{{ form.errors.violation_type_id }}</p></label><label class="block text-sm font-semibold text-slate-700">Tanggal<input v-model="form.date" type="date" class="app-input mt-2 w-full" /><p class="mt-1 text-sm text-red-600">{{ form.errors.date }}</p></label><label class="block text-sm font-semibold text-slate-700">Catatan<textarea v-model="form.note" class="app-input mt-2 w-full" rows="4" /><p class="mt-1 text-sm text-red-600">{{ form.errors.note }}</p></label><label class="block text-sm font-semibold text-slate-700">Bukti<input type="file" class="app-input mt-2" @change="form.evidence = ($event.target as HTMLInputElement).files?.[0] ?? null" /><p class="mt-1 text-sm text-red-600">{{ form.errors.evidence }}</p></label><div class="flex flex-wrap gap-2 border-t border-slate-100 pt-5"><button class="app-button-primary" :disabled="form.processing">Simpan</button><Link :href="route('tenant.student-violations.index', tenantParams())" class="app-button-secondary">Kembali</Link></div></form></AuthenticatedLayout></template>

@@ -1,0 +1,40 @@
+---
+/** Ilustrasi abstrak — tanpa URL, nama sekolah, atau data sensitif */
+---
+
+<div class="relative w-full" aria-hidden="true">
+	<div class="overflow-hidden rounded-[var(--radius-card)] border border-border bg-canvas shadow-[0_24px_48px_-12px_rgba(15,23,42,0.12)]">
+		<div class="border-b border-border bg-surface px-5 py-4">
+			<div class="flex items-center gap-3">
+				<span class="h-9 w-9 rounded-lg bg-brand-800"></span>
+				<div class="space-y-2">
+					<span class="block h-2.5 w-32 rounded-full bg-brand-900/10"></span>
+					<span class="block h-2 w-24 rounded-full bg-brand-900/5"></span>
+				</div>
+			</div>
+		</div>
+		<div class="grid gap-4 p-5 sm:grid-cols-3 sm:p-6">
+			<div class="rounded-lg border border-border bg-surface p-4 sm:col-span-2">
+				<p class="text-[11px] font-semibold uppercase tracking-wider text-ink-faint">Ringkasan kehadiran</p>
+				<div class="mt-4 flex h-20 items-end gap-2">
+					{
+						[40, 55, 48, 62, 58, 70, 65].map((h) => (
+							<span class="flex-1 rounded-sm bg-brand-700/80" style={`height:${h}%`} />
+						))
+					}
+				</div>
+			</div>
+			<div class="space-y-3">
+				<div class="rounded-lg border border-border p-3">
+					<p class="text-[11px] text-ink-faint">Laporan</p>
+					<span class="mt-2 block h-2 w-full rounded bg-brand-900/8"></span>
+					<span class="mt-1.5 block h-2 w-4/5 rounded bg-brand-900/5"></span>
+				</div>
+				<div class="rounded-lg border border-border p-3">
+					<p class="text-[11px] text-ink-faint">Aktivitas</p>
+					<span class="mt-2 block h-2 w-full rounded bg-brand-900/8"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

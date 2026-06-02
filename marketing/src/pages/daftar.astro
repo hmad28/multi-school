@@ -1,0 +1,105 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SectionLabel from '../components/ui/SectionLabel.astro';
+import { site } from '../config/site';
+import { pricingTiers, formatRupiah } from '../config/pricing';
+
+const input =
+	'mt-2 w-full rounded-[var(--radius-btn)] border border-border-strong px-4 py-3 text-sm outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100';
+
+const paket = Astro.url.searchParams.get('paket');
+const selectedTier = pricingTiers.find((t) => t.id === paket);
+---
+
+<MarketingLayout title="Daftar sekolah" description={`Daftar Platform Sekolah — trial ${site.trialDays} hari atau berlangganan.`}>
+	<Header />
+	<main class="section-pad">
+		<div class="container-main grid gap-12 lg:grid-cols-5 lg:gap-16">
+			<div class="lg:col-span-2">
+				<SectionLabel>Daftar</SectionLabel>
+				<h1 class="text-section mt-4 text-ink">Daftarkan sekolah Anda</h1>
+				{
+					selectedTier ? (
+						<p class="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-900">
+							Paket: <strong>{selectedTier.name}</strong>
+							{selectedTier.monthlyIdr != null && (
+								<span> — mulai {formatRupiah(selectedTier.monthlyIdr)}/bulan setelah trial</span>
+							)}
+						</p>
+					) : (
+						<p class="mt-4 text-ink-muted">
+							Mulai <strong class="text-ink">trial {site.trialDays} hari gratis</strong>, lalu pilih Standar, Plus
+							AI, atau hubungi kami untuk paket Custom.
+						</p>
+					)
+				}
+				<p class="mt-8 text-sm text-ink-muted">
+					<a href={`mailto:${site.contactEmail}`} class="font-semibold text-brand-800 hover:underline">
+						{site.contactEmail}
+					</a>
+				</p>
+			</div>
+
+			<form
+				class="rounded-[var(--radius-card)] border border-border bg-canvas p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8 lg:col-span-3"
+				action="#"
+				method="post"
+			>
+				<div class="space-y-5">
+					<div>
+						<label for="plan" class="text-sm font-semibold text-ink">Paket</label>
+						<select id="plan" name="plan" class={input}>
+							<option value="trial" selected={!paket}>
+								Trial — gratis {site.trialDays} hari
+							</option>
+							{
+								pricingTiers.map((tier) =>
+									tier.contactOnly ? (
+										<option value={tier.id} selected={paket === tier.id}>
+											{tier.name} — hubungi kami
+										</option>
+									) : (
+										<option value={tier.id} selected={paket === tier.id}>
+											{tier.name} — {formatRupiah(tier.monthlyIdr!)}/bulan
+										</option>
+									),
+								)
+							}
+						</select>
+					</div>
+					<div>
+						<label for="billing" class="text-sm font-semibold text-ink">Siklus bayar (setelah trial)</label>
+						<select id="billing" name="billing" class={input}>
+							<option value="monthly">Bulanan</option>
+							<option value="yearly">Tahunan (diskon)</option>
+						</select>
+					</div>
+					<div>
+						<label for="school_name" class="text-sm font-semibold text-ink">Nama sekolah</label>
+						<input id="school_name" name="school_name" type="text" required class={input} placeholder="SDIT Contoh" />
+					</div>
+					<div class="grid gap-5 sm:grid-cols-2">
+						<div>
+							<label for="admin_name" class="text-sm font-semibold text-ink">Nama admin</label>
+							<input id="admin_name" name="admin_name" type="text" required class={input} placeholder="Nama lengkap" />
+						</div>
+						<div>
+							<label for="admin_email" class="text-sm font-semibold text-ink">Email admin</label>
+							<input id="admin_email" name="admin_email" type="email" required class={input} placeholder="admin@sekolah.sch.id" />
+						</div>
+					</div>
+					<button
+						type="submit"
+						disabled
+						class="w-full cursor-not-allowed rounded-[var(--radius-btn)] bg-brand-800/50 py-3 text-sm font-semibold text-white"
+					>
+						Daftar sekolah (segera aktif)
+					</button>
+				</div>
+			</form>
+		</div>
+	</main>
+	<Footer />
+</MarketingLayout>

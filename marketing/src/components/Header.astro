@@ -1,0 +1,33 @@
+---
+import { site } from '../config/site';
+import Button from './ui/Button.astro';
+
+const nav = [
+	{ href: '/#fitur', label: 'Fitur' },
+	{ href: '/#untuk-siapa', label: 'Untuk siapa' },
+	{ href: '/harga', label: 'Harga' },
+	{ href: '/#faq', label: 'FAQ' },
+];
+---
+
+<header class="sticky top-0 z-50 border-b border-border bg-canvas/95 backdrop-blur-sm">
+	<div class="container-main flex h-16 items-center justify-between">
+		<a href="/" class="flex items-center gap-3">
+			<span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-950 text-xs font-bold text-white" aria-hidden="true">PS</span>
+			<span class="text-[15px] font-bold tracking-tight text-ink">{site.name}</span>
+		</a>
+		<nav class="hidden items-center gap-8 md:flex" aria-label="Utama">
+			{nav.map((item) => (
+				<a href={item.href} class="text-sm font-medium text-ink-muted transition hover:text-ink">
+					{item.label}
+				</a>
+			))}
+		</nav>
+		<div class="flex items-center gap-3">
+			<a href={`mailto:${site.contactEmail}`} class="hidden text-sm font-medium text-ink-muted hover:text-ink sm:inline">
+				Hubungi kami
+			</a>
+			<Button href={site.registerUrl} variant="primary" size="md">Mulai gratis</Button>
+		</div>
+	</div>
+</header>

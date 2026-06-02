@@ -1,0 +1,202 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import HeroVisual from '../components/HeroVisual.astro';
+import Button from '../components/ui/Button.astro';
+import SectionLabel from '../components/ui/SectionLabel.astro';
+import FeatureIcon from '../components/icons/FeatureIcon.astro';
+import { site } from '../config/site';
+import { featureModules, roles } from '../config/features';
+
+const steps = [
+	{ title: 'Daftar & trial', desc: `Trial gratis ${site.trialDays} hari — fitur Standar + preview AI.` },
+	{ title: 'Setup sekolah', desc: 'Import murid, undang guru, atur peran.' },
+	{ title: 'Berlangganan', desc: 'Pilih Standar, Plus AI, atau Plus AI & Custom.' },
+];
+
+const faqs = [
+	{
+		q: 'Untuk jenis sekolah apa?',
+		a: 'Fokus sekolah swasta dan madrasah yang butuh administrasi kedisiplinan harian — SD, SMP, SMA, dan setara.',
+	},
+	{
+		q: 'Apakah perlu kartu RFID?',
+		a: 'Tidak. Absensi bisa lewat input guru atau scan QR dari HP guru di kelas.',
+	},
+	{
+		q: 'Apakah wali murid bisa login?',
+		a: 'Ya, portal wali murid tersedia mulai paket Plus AI (bukan di paket Standar).',
+	},
+	{
+		q: 'Bagaimana memulai?',
+		a: `Daftar online, mulai trial gratis ${site.trialDays} hari. Setelah itu bayar paket bulanan flat per sekolah.`,
+	},
+];
+---
+
+<MarketingLayout>
+	<Header />
+	<main>
+		<section class="section-pad border-b border-border">
+			<div class="container-main grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+				<div>
+					<SectionLabel>Platform Sekolah</SectionLabel>
+					<h1 class="text-hero text-balance mt-5 text-ink">
+						Absensi, kedisiplinan, dan karakter murid — dalam satu platform
+					</h1>
+					<p class="mt-5 max-w-md text-[17px] leading-relaxed text-ink-muted">
+						{site.tagline} Dibangun dari pilot operasional sekolah nyata: QR absensi, BK, portal wali murid, laporan
+						Excel — tanpa spreadsheet berantakan.
+					</p>
+					<div class="mt-9 flex flex-wrap gap-3">
+						<Button href={site.registerUrl} variant="primary" size="lg">Mulai trial gratis</Button>
+						<Button href="/harga" variant="outline" size="lg">Lihat harga</Button>
+					</div>
+				</div>
+				<HeroVisual />
+			</div>
+		</section>
+
+		<section id="fitur" class="section-pad bg-surface">
+			<div class="will-reveal container-main">
+				<div class="max-w-2xl">
+					<SectionLabel>Fitur lengkap</SectionLabel>
+					<h2 class="text-section mt-4 text-ink">Semua modul yang TU, guru, dan BK butuhkan</h2>
+					<p class="mt-3 text-ink-muted">
+						Bukan sekadar absensi — ini sistem kedisiplinan harian lengkap untuk sekolah swasta Indonesia.
+					</p>
+				</div>
+				<div class="mt-14 grid gap-6 md:grid-cols-2">
+					{
+						featureModules.map((f) => (
+							<article class="rounded-[var(--radius-card)] border border-border bg-canvas p-7">
+								<div class="flex items-start gap-4">
+									<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-800">
+										<FeatureIcon name={f.key} />
+									</span>
+									<div>
+										<h3 class="text-lg font-bold text-ink">{f.title}</h3>
+										<p class="mt-1 text-sm text-ink-muted">{f.summary}</p>
+									</div>
+								</div>
+								<ul class="mt-5 space-y-2 border-t border-border pt-5">
+									{f.bullets.map((b) => (
+										<li class="flex gap-2 text-sm text-ink-muted">
+											<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700" aria-hidden="true" />
+											{b}
+										</li>
+									))}
+								</ul>
+							</article>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<section id="untuk-siapa" class="section-pad">
+			<div class="will-reveal container-main">
+				<SectionLabel>Untuk siapa</SectionLabel>
+				<h2 class="text-section mt-4 text-ink">Seluruh tim sekolah dalam satu platform</h2>
+				<p class="mt-3 max-w-xl text-ink-muted">Setiap peran hanya melihat menu dan data yang relevan.</p>
+				<div class="mt-12 grid gap-4 sm:grid-cols-2">
+					{
+						roles.map((r) => (
+							<article class="rounded-[var(--radius-card)] border border-border bg-canvas p-6">
+								<h3 class="font-bold text-ink">{r.title}</h3>
+								<p class="mt-2 text-sm leading-relaxed text-ink-muted">{r.desc}</p>
+							</article>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<section class="section-pad bg-brand-950 text-white">
+			<div class="will-reveal container-main">
+				<SectionLabel>Keamanan & privasi</SectionLabel>
+				<h2 class="text-section mt-4 max-w-2xl text-white">Data sekolah Anda tetap terlindungi</h2>
+				<p class="mt-4 max-w-2xl text-sm leading-relaxed text-white/70">
+					Setiap sekolah beroperasi di lingkungan terpisah. Akses berbasis peran, dan panduan keamanan untuk admin
+					disertakan saat onboarding — tanpa perlu mengungkap detail teknis di halaman publik ini.
+				</p>
+				<ul class="mt-8 grid gap-4 text-sm sm:grid-cols-3">
+					<li class="rounded-lg border border-white/10 px-4 py-3 text-white/85">Akses berbasis peran</li>
+					<li class="rounded-lg border border-white/10 px-4 py-3 text-white/85">Data terisolasi per sekolah</li>
+					<li class="rounded-lg border border-white/10 px-4 py-3 text-white/85">Wali murid: data anak sendiri saja</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="cara-kerja" class="section-pad bg-surface">
+			<div class="will-reveal container-main">
+				<SectionLabel>Memulai</SectionLabel>
+				<h2 class="text-section mt-4 text-ink">Tiga langkah ke operasional</h2>
+				<ol class="mt-12 grid gap-6 md:grid-cols-3">
+					{
+						steps.map((s, i) => (
+							<li class="rounded-[var(--radius-card)] border border-border bg-canvas p-6">
+								<span class="text-sm font-bold text-brand-700">Langkah {i + 1}</span>
+								<h3 class="mt-3 font-bold text-ink">{s.title}</h3>
+								<p class="mt-2 text-sm text-ink-muted">{s.desc}</p>
+							</li>
+						))
+					}
+				</ol>
+			</div>
+		</section>
+
+		<section class="section-pad">
+			<div
+				class="will-reveal container-main flex flex-col items-start justify-between gap-8 rounded-[var(--radius-card)] border border-border bg-canvas p-8 sm:flex-row sm:items-center sm:p-10"
+			>
+				<div>
+					<SectionLabel>Harga</SectionLabel>
+					<h2 class="text-section mt-3 text-ink">Standar, Plus AI, atau Custom</h2>
+					<p class="mt-2 text-sm text-ink-muted">
+						Satu harga per sekolah · Bulanan atau tahunan (diskon) · Trial {site.trialDays} hari gratis
+					</p>
+				</div>
+				<Button href="/harga" variant="primary" size="lg">Bandingkan paket</Button>
+			</div>
+		</section>
+
+		<section id="faq" class="section-pad border-t border-border bg-surface">
+			<div class="will-reveal container-main max-w-2xl">
+				<SectionLabel>FAQ</SectionLabel>
+				<h2 class="text-section mt-4 text-ink">Pertanyaan umum</h2>
+				<dl class="mt-10 divide-y divide-border">
+					{
+						faqs.map((item) => (
+							<div class="py-6">
+								<dt class="font-semibold text-ink">{item.q}</dt>
+								<dd class="mt-2 text-sm text-ink-muted">{item.a}</dd>
+							</div>
+						))
+					}
+				</dl>
+			</div>
+		</section>
+
+		<section class="section-pad !pt-0">
+			<div class="container-main rounded-[var(--radius-card)] border border-border bg-brand-50 px-6 py-5 text-sm text-ink-muted">
+				{site.existingClientHint}
+			</div>
+		</section>
+
+		<section class="section-pad !pt-8">
+			<div class="will-reveal container-main text-center">
+				<h2 class="text-section text-ink">Mulai trial {site.trialDays} hari gratis</h2>
+				<p class="mx-auto mt-3 max-w-md text-ink-muted">
+					Fitur Standar + preview AI · Tanpa kartu kredit · Pilih paket setelah trial
+				</p>
+				<div class="mt-8 flex flex-wrap justify-center gap-3">
+					<Button href={site.registerUrl} variant="primary" size="lg">Daftar sekolah</Button>
+					<Button href="/harga" variant="outline" size="lg">Lihat paket & harga</Button>
+				</div>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</MarketingLayout>

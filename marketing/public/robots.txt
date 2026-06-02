@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://platformsekolah.id/sitemap-index.xml

@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(code-review:code-review)",
+      "PowerShell(Select-String -Path \"C:\\\\Projects\\\\multi-school\\\\PRD-cahaya-sunnah-school-system.md\" -Pattern \"^#|^##|^###|In scope|Out of scope|MVP|Fase|Phase|Prioritas|Acceptance|Role|Permission|Tenant|Billing|Deployment|SaaS|Pilot|Cahaya\" | ForEach-Object { $_.Line })",
+      "PowerShell(Select-String -Path \"C:\\\\Projects\\\\multi-school\\\\PRD-v2.0-addendum-kode-dan-saas.md\" -Pattern \"^#|^##|^###|kode|SaaS|tenant|sekolah|subscription|billing|role|permission|deployment|pricing|onboarding\" | ForEach-Object { $_.Line })",
+      "PowerShell(New-Item *)",
+      "PowerShell(php artisan test --filter=TenantIsolationTest)",
+      "PowerShell(php artisan test --filter=PlatformPathRoutesTest)",
+      "PowerShell(php artisan test --filter=SuperAdminCanListTenantsTest)",
+      "PowerShell(php artisan test)",
+      "PowerShell(npm run *)",
+      "PowerShell(php artisan migrate:fresh --seed)",
+      "PowerShell(php artisan serve --host=127.0.0.1 --port=8888)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://127.0.0.1:8888/platform/login\" -UseBasicParsing | Select-Object -ExpandProperty StatusCode; Invoke-WebRequest -Uri \"http://127.0.0.1:8888/t/demo/login\" -UseBasicParsing | Select-Object -ExpandProperty StatusCode; Invoke-WebRequest -Uri \"http://127.0.0.1:8888/t/alfa/login\" -UseBasicParsing | Select-Object -ExpandProperty StatusCode)",
+      "Bash(/c/Users/Pongo/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh *)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8888/t/demo/login' -UseBasicParsing -TimeoutSec 10; \"tenant-login=$\\($r.StatusCode\\)\" } catch { \"tenant-login-error=$\\($_.Exception.Message\\)\" })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8888/dashboard' -UseBasicParsing -TimeoutSec 10 -MaximumRedirection 0; \"dashboard=$\\($r.StatusCode\\)\" } catch { if \\($_.Exception.Response\\) { \"dashboard=$\\([int]$_.Exception.Response.StatusCode\\)\" } else { \"dashboard-error=$\\($_.Exception.Message\\)\" } })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8888/t/demo/dashboard' -UseBasicParsing -TimeoutSec 10 -MaximumRedirection 0; \"tenant-dashboard=$\\($r.StatusCode\\)\" } catch { if \\($_.Exception.Response\\) { \"tenant-dashboard=$\\([int]$_.Exception.Response.StatusCode\\)\" } else { \"tenant-dashboard-error=$\\($_.Exception.Message\\)\" } })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8888/platform/login' -UseBasicParsing -TimeoutSec 10; \"platform-login=$\\($r.StatusCode\\)\" } catch { \"platform-login-error=$\\($_.Exception.Message\\)\" })",
+      "PowerShell(cmd /c dir /a \"C:\\\\Projects\\\\project-cahaya-sunnah\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Projects\\\\project-cahaya-sunnah\" -Directory | Where-Object { $_.Name -notin @\\('vendor','node_modules','.tmp-laravel'\\) } | Select-Object Name)",
+      "PowerShell(php artisan test --filter=AcademicCalendarHolidayTest)",
+      "Bash(php artisan *)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(powershell -Command \"\\(Get-Content docs/plans/06-frontend-plan.md -Raw\\) -replace 'Absensi Siswa.*Live route \\\\\\(T1 Slice 2\\\\\\)\\\\r?\\\\n  └── QR Scanner\\\\r?\\\\nAbsensi Guru', 'Absensi Siswa               ✅ Live route \\(T1 Slice 2\\)'+ [char]10+'  └── QR Scanner              ✅ Live route \\(T1 Slice 3\\)'+ [char]10+'Absensi Guru                ✅ Live route \\(T1 Slice 4\\)' | Set-Content docs/plans/06-frontend-plan.md -Encoding utf8\")",
+      "Bash(findstr /i \"skip\")",
+      "Bash(Select-String \"SKIPPED|skip\" -Context 0,3)",
+      "PowerShell(php artisan test --compact 2>&1)",
+      "PowerShell(php artisan test --filter=\"skipped|SKIPPED\" 2>&1; php artisan test 2>&1 | ConvertFrom-Json | ForEach-Object { Write-Host \"Skipped $_\" })",
+      "PowerShell(php vendor/bin/phpunit --no-configuration 2>&1; if \\($?\\) { php vendor/bin/phpunit --display-skipped 2>&1 | Select-String -Pattern \"OK\" } else { php vendor/bin/phpunit 2>&1 | ForEach-Object { if \\($_ -match \"skipped|\\\\bOK\\\\b\"\\) { Write-Output $_ } } })",
+      "PowerShell(php vendor/bin/phpunit --display-skipped 2>&1 | Where-Object { $_ -match \"Skip|skip\" })",
+      "PowerShell(php vendor/bin/phpunit --no-output 2>&1)",
+      "PowerShell(git init *)",
+      "PowerShell(git add *)"
+    ]
+  }
+}

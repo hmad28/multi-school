@@ -1,0 +1,61 @@
+---
+const rows = [
+	{ label: 'Absensi & kedisiplinan inti', standar: true, ai: true, custom: true },
+	{ label: 'Laporan PDF & Excel', standar: true, ai: true, custom: true },
+	{ label: 'Import data murid', standar: true, ai: true, custom: true },
+	{ label: 'Portal wali murid', standar: false, ai: true, custom: true },
+	{ label: 'WhatsApp ke wali murid', standar: false, ai: true, custom: true },
+	{ label: 'Modul AI & insight', standar: false, ai: true, custom: true },
+	{ label: 'Fitur custom & integrasi', standar: false, ai: false, custom: true },
+	{ label: 'Support dedicated', standar: false, ai: false, custom: true },
+];
+---
+
+<div class="overflow-hidden rounded-2xl border border-border bg-canvas">
+	<div class="border-b border-border bg-surface px-6 py-4">
+		<h3 class="font-bold text-ink">Bandingkan paket</h3>
+		<p class="mt-1 text-sm text-ink-muted">Satu pandangan — pilih yang pas untuk sekolah Anda.</p>
+	</div>
+	<div class="overflow-x-auto">
+		<table class="w-full min-w-[36rem] text-sm">
+			<thead>
+				<tr class="border-b border-border text-left">
+					<th class="px-6 py-4 font-semibold text-ink-muted">Fitur</th>
+					<th class="px-4 py-4 text-center font-bold text-ink">Standar</th>
+					<th class="px-4 py-4 text-center font-bold text-brand-800">Plus AI</th>
+					<th class="px-6 py-4 text-center font-bold text-ink">Custom</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((row, i) => (
+						<tr class:list={[i % 2 === 0 ? 'bg-canvas' : 'bg-surface/60', 'border-b border-border/80 last:border-0']}>
+							<td class="px-6 py-3.5 font-medium text-ink">{row.label}</td>
+							<td class="px-4 py-3.5 text-center">
+								{row.standar ? (
+									<span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-brand-700" aria-label="Ya">✓</span>
+								) : (
+									<span class="text-ink-faint" aria-label="Tidak">—</span>
+								)}
+							</td>
+							<td class="px-4 py-3.5 text-center bg-brand-50/50">
+								{row.ai ? (
+									<span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-white text-xs" aria-label="Ya">✓</span>
+								) : (
+									<span class="text-ink-faint" aria-label="Tidak">—</span>
+								)}
+							</td>
+							<td class="px-6 py-3.5 text-center">
+								{row.custom ? (
+									<span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-brand-700" aria-label="Ya">✓</span>
+								) : (
+									<span class="text-ink-faint" aria-label="Tidak">—</span>
+								)}
+							</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+</div>

@@ -1,0 +1,101 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Button from '../components/ui/Button.astro';
+import SectionLabel from '../components/ui/SectionLabel.astro';
+import PricingCard from '../components/pricing/PricingCard.astro';
+import PricingCompare from '../components/pricing/PricingCompare.astro';
+import { site } from '../config/site';
+import { pricingTiers, yearlyDiscountPercent } from '../config/pricing';
+---
+
+<MarketingLayout title="Harga" description="Harga Platform Sekolah — Standar, Plus AI, Custom. Trial gratis 14 hari.">
+	<Header />
+	<main class="pricing-hero-bg">
+		<!-- Hero -->
+		<section class="section-pad !pb-12">
+			<div class="container-wide text-center">
+				<SectionLabel>Harga</SectionLabel>
+				<h1 class="text-section text-balance mx-auto mt-4 max-w-2xl text-ink">
+					Harga jelas per sekolah, pilih tingkat fiturnya
+				</h1>
+				<p class="mx-auto mt-4 max-w-xl text-[17px] text-ink-muted">
+					Bukan per murid. Bayar bulanan atau tahunan — hemat {yearlyDiscountPercent}% jika tahunan.
+				</p>
+				<div class="mx-auto mt-8 inline-flex flex-wrap items-center justify-center gap-3 text-sm text-ink-muted">
+					<span class="rounded-full border border-border bg-canvas px-4 py-2">✓ Flat per sekolah</span>
+					<span class="rounded-full border border-border bg-canvas px-4 py-2">✓ Trial {site.trialDays} hari gratis</span>
+					<span class="rounded-full border border-border bg-canvas px-4 py-2">✓ Tanpa kartu kredit</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- Trial -->
+		<section class="px-5 pb-16 sm:px-8">
+			<div class="container-wide">
+				<div
+					class="relative overflow-hidden rounded-2xl bg-brand-950 px-6 py-8 text-white sm:flex sm:items-center sm:justify-between sm:px-10 sm:py-9"
+				>
+					<div
+						class="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-600/30 blur-3xl"
+						aria-hidden="true"
+					>
+					</div>
+					<div class="relative max-w-lg">
+						<p class="text-xs font-bold uppercase tracking-widest text-brand-300">Coba dulu</p>
+						<h2 class="mt-2 text-2xl font-bold">Trial {site.trialDays} hari — gratis</h2>
+						<p class="mt-2 text-sm text-white/70">
+							Akses fitur Standar + preview AI. Setelah itu pilih paket berbayar.
+						</p>
+					</div>
+					<Button
+						href={site.registerUrl}
+						variant="primary"
+						size="lg"
+						class="relative mt-6 w-full justify-center !bg-white !text-brand-900 hover:!bg-brand-50 sm:mt-0 sm:w-auto"
+					>
+						Mulai trial gratis
+					</Button>
+				</div>
+			</div>
+		</section>
+
+		<!-- Cards -->
+		<section class="section-pad border-t border-border bg-surface !pt-16">
+			<div class="container-wide">
+				<p class="text-center text-sm font-medium text-ink-muted">
+					Harga di bawah per bulan. Pembayaran tahunan mendapat diskon {yearlyDiscountPercent}%.
+				</p>
+				<div class="mt-12 grid items-stretch gap-6 lg:grid-cols-3 lg:gap-5">
+					{pricingTiers.map((tier) => <PricingCard tier={tier} />)}
+				</div>
+			</div>
+		</section>
+
+		<!-- Compare -->
+		<section class="section-pad !pt-8">
+			<div class="container-wide">
+				<PricingCompare />
+				<p class="mt-8 text-center text-xs text-ink-faint">
+					Harga dapat berubah. Kapasitas murid dibahas saat pendaftaran. Sekolah founding — hubungi kami.
+				</p>
+			</div>
+		</section>
+
+		<!-- CTA -->
+		<section class="px-5 pb-24 sm:px-8">
+			<div class="container-wide rounded-2xl border border-border bg-canvas px-8 py-12 text-center">
+				<h2 class="text-xl font-bold text-ink">Masih bingung paket mana?</h2>
+				<p class="mx-auto mt-2 max-w-md text-sm text-ink-muted">
+					Mulai trial gratis, atau email kami untuk rekomendasi paket.
+				</p>
+				<div class="mt-6 flex flex-wrap justify-center gap-3">
+					<Button href={site.registerUrl} variant="primary" size="lg">Mulai trial</Button>
+					<Button href={`mailto:${site.contactEmail}`} variant="outline" size="lg">Tanya via email</Button>
+				</div>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</MarketingLayout>
