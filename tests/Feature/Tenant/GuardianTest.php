@@ -29,14 +29,18 @@ class GuardianTest extends TestCase
 
     public function test_wali_murid_can_view_guardian_dashboard(): void
     {
+        $child = Student::query()->where('school_id', $this->demo->id)->firstOrFail();
+
         $this->actingAs($this->waliDemo)
             ->get(route('tenant.guardian.dashboard', ['tenant' => $this->demo->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Guardian/Dashboard')
                 ->has('children')
+                ->where('children.0.full_name', $child->name)
                 ->has('summary')
                 ->has('latestAttendances')
+                ->where('latestAttendances.0.student_name', $child->name)
                 ->has('latestCharacterPoints')
                 ->has('latestViolations')
             );

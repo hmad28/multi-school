@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Registration\SchoolRegistrationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,6 +13,11 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('daftar', [SchoolRegistrationController::class, 'create'])->name('school.register');
+    Route::post('daftar', [SchoolRegistrationController::class, 'store'])->name('school.register.store');
 });
 
 Route::get('/dashboard', function () {

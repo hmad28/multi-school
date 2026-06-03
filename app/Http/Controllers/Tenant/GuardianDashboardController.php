@@ -65,7 +65,7 @@ class GuardianDashboardController extends Controller
                 ->get()
                 ->map(fn (StudentAttendance $attendance) => [
                     'id' => $attendance->id,
-                    'student_name' => $attendance->student?->full_name,
+                    'student_name' => $attendance->student?->name,
                     'date' => $attendance->date?->toDateString(),
                     'code' => $attendance->status?->code,
                     'status' => $attendance->status?->name,
@@ -78,7 +78,7 @@ class GuardianDashboardController extends Controller
                 ->get()
                 ->map(fn (StudentCharacterPoint $point) => [
                     'id' => $point->id,
-                    'student_name' => $point->student?->full_name,
+                    'student_name' => $point->student?->name,
                     'type' => $point->characterPointType?->name,
                     'date' => $point->date?->toDateString(),
                     'points' => $point->points_snapshot,
@@ -90,7 +90,7 @@ class GuardianDashboardController extends Controller
                 ->get()
                 ->map(fn (StudentViolation $violation) => [
                     'id' => $violation->id,
-                    'student_name' => $violation->student?->full_name,
+                    'student_name' => $violation->student?->name,
                     'violation_type' => $violation->violationType?->name,
                     'date' => $violation->date?->toDateString(),
                     'points' => $violation->points_snapshot,

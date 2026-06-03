@@ -58,6 +58,8 @@ erDiagram
 | logo_path | varchar(255) | nullable | S3 |
 | timezone | varchar(50) | default Asia/Jakarta | |
 | status | varchar(20) | not null | `trial`, `active`, `suspended`, `expired` |
+| onboarding_step | tinyint unsigned | default 0 | Progres wizard onboarding (GT1) |
+| onboarding_completed_at | timestamp | nullable | Tanda onboarding selesai (GT1) |
 | trial_ends_at | timestamp | nullable | |
 | student_attendance_late_after | time | nullable | Dari pilot `school_settings` |
 | student_attendance_start_time | time | nullable | |
@@ -93,7 +95,7 @@ erDiagram
 | name | varchar | not null | |
 | email | varchar(255) | **unique global** | Satu email satu akun di seluruh platform |
 | password | varchar(255) | not null | |
-| email_verified_at | timestamp | nullable | Wajib untuk aktivasi |
+| email_verified_at | timestamp | nullable | Wajib untuk aktivasi — `MustVerifyEmail` **di-enforce sejak GT1**; harus masuk `User` `#[Fillable]` agar seeder/test bisa set |
 | teacher_id | uuid | nullable FK | ⚠️ belum diimplementasi |
 | status | varchar(20) | default active | ⚠️ belum diimplementasi |
 | remember_token | varchar(100) | nullable | |

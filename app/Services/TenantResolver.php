@@ -22,6 +22,7 @@ class TenantResolver
                 SchoolStatus::Trial,
                 SchoolStatus::Active,
                 SchoolStatus::Suspended,
+                SchoolStatus::Expired,
             ])
             ->first();
     }

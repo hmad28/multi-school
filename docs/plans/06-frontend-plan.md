@@ -91,21 +91,22 @@ resources/js/Pages/Platform/
 
 ---
 
-## 4. Onboarding & registrasi (P6)
+## 4. Onboarding & registrasi (GT1 — ✅ implemented)
 
 ```text
 resources/js/Pages/
-├── Welcome.vue              # landing marketing
-├── Auth/RegisterSchool.vue  # form daftar
+├── Welcome.vue                  # landing marketing
+├── Auth/RegisterSchool.vue      # form daftar sekolah (central /daftar, Inertia)
 └── Onboarding/
-    ├── Profile.vue          # logo, alamat, kepala sekolah
-    ├── AcademicYear.vue
-    ├── Classes.vue
-    ├── ImportStudents.vue
-    └── InviteUsers.vue
+    └── Index.vue                # checklist hub soft-gate (bukan 5 page terpisah)
 ```
 
-Progress stepper 1–5; simpan state di backend (`onboarding_step` di `schools` opsional).
+**Keputusan implementasi:** alih-alih 5 halaman stepper (`Step1..Step5`), onboarding dibuat **satu checklist hub** (`Onboarding/Index.vue`) yang soft-gate:
+- Deteksi status tiap langkah dari data nyata (profil sekolah, tahun ajaran aktif, kelas, siswa, jumlah user).
+- Form inline untuk **profil sekolah** + **undang pengguna** (mengisi P2 follow-up); langkah akademik/kelas/siswa nge-link ke CRUD existing supaya tak duplikasi UI.
+- Progress bar + tombol "Lewati dulu" (ke dashboard) dan "Tandai selesai" (stamp `onboarding_completed_at`).
+
+State disimpan di `schools.onboarding_step` / `onboarding_completed_at`. Routing pasca-verify via `PostAuthRedirect` (admin onboarding belum selesai → `tenant.onboarding.show`).
 
 ---
 
@@ -172,6 +173,8 @@ Data awal dashboard boleh berasal dari P2 master data (`students`, `teachers`, `
 
 | Page | Catatan |
 |------|---------|
+| `Auth/RegisterSchool` | Form daftar sekolah di central `/daftar` — ✅ (GT1) |
+| `Onboarding/Index` | Checklist hub soft-gate; profil + invite inline, link CRUD — ✅ (GT1) |
 | `AcademicCalendar/Holidays/Index` | Kalender + list per bulan; Create, Edit — ✅ (T1 Slice 1) |
 | `Attendance/Students/Index` | Grid status H/T/I/S/A cepat — ✅ (T1 Slice 2) |
 | `Attendance/Students/Recap` | Rekap per periode — ✅ (T1 Slice 2) |

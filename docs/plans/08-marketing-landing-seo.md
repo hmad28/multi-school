@@ -84,7 +84,7 @@ DNS: `platformsekolah.id` + `*` + `admin` → **Cloudflare Tunnel** ke mini PC (
 
 ---
 
-## 4. Integrasi registrasi (pilih satu di P6)
+## 4. Integrasi registrasi — ✅ Opsi B implemented (GT1)
 
 ### Opsi A — Form di Astro → API Laravel (disarankan jangka panjang)
 
@@ -100,12 +100,11 @@ Content-Type: application/json
 - Astro: fetch + error handling bahasa Indonesia.
 - CORS: allow origin `https://platformsekolah.id` saja.
 
-### Opsi B — CTA link ke Laravel
+### Opsi B — CTA link ke Laravel ✅ **DIPILIH & IMPLEMENTED (GT1, 2026-06-03)**
 
-Tombol di Astro: `href="https://platformsekolah.id/daftar"`  
-Satu route Blade minimal di Laravel (boleh Inertia guest satu halaman) — lebih cepat v1, SEO form page di Laravel (Blade) masih OK.
+Tombol di Astro link ke `site.registerUrl` = `${PUBLIC_APP_URL}/daftar` (env `PUBLIC_APP_URL`, default `http://127.0.0.1:8888` dev). `daftar.astro` kini halaman penjelasan + CTA (bukan form stub mati), meneruskan param `paket`/`billing`. Form registrasi sebenarnya halaman Inertia guest `Auth/RegisterSchool.vue` di Laravel (`SchoolRegistrationController`), lengkap dengan verifikasi email + onboarding.
 
-**Rekomendasi:** v1 **Opsi B** cepat; v1.1 migrasi form ke Astro + API.
+**Rekomendasi:** v1 **Opsi B** (selesai); v1.1 migrasi form ke Astro + API jika perlu.
 
 ---
 
@@ -143,7 +142,7 @@ Pages dan tunnel bisa satu akun Cloudflare.
 | Framer/Webflow mock landing | Sebelum P6 |
 | Scaffold `marketing/` Astro | P0 atau P6 |
 | Halaman index + harga + fitur | P6 |
-| Wire CTA register ke Laravel | P6 |
+| Wire CTA register ke Laravel | P6 — ✅ done (GT1, Opsi B) |
 | Pages deploy + DNS | P7 |
 
 ---

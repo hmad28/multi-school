@@ -31,6 +31,10 @@ class SetCurrentSchool
             abort(403, 'Akses sekolah ditangguhkan. Hubungi Platform Sekolah.');
         }
 
+        if ($school->status === SchoolStatus::Expired) {
+            abort(403, 'Masa trial telah berakhir. Hubungi Platform Sekolah untuk perpanjangan.');
+        }
+
         if ($school->status === SchoolStatus::Trial && $school->trial_ends_at?->isPast()) {
             abort(403, 'Masa trial telah berakhir. Hubungi Platform Sekolah untuk perpanjangan.');
         }

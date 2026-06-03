@@ -304,9 +304,9 @@ Alert: backup gagal, queue stalled, disk full.
 - [ ] `php artisan migrate --force` production
 - [ ] Seed `super-admin` + permissions
 - [ ] Tenant isolation tests pass di CI
-- [ ] Trial job scheduled (scheduler cron)
-- [ ] Email verifikasi terkirim
-- [ ] Smoke: register → onboarding → input absensi
+- [ ] Trial job scheduled (scheduler cron) — command `platform:trial-reminders` + `Schedule::command(...)->dailyAt('07:00')` sudah ada di kode (GT1); production tinggal pasang `* * * * * php artisan schedule:run`
+- [ ] Email verifikasi terkirim — flow enforced di kode (GT1); production butuh `MAIL_MAILER` real (dev pakai `log`)
+- [ ] Smoke: register → onboarding → input absensi — flow lengkap di kode (GT1, SchoolRegistrationTest); verifikasi end-to-end di staging
 - [ ] Privacy: isolasi 2 tenant manual test
 
 ---

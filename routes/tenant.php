@@ -68,6 +68,11 @@ Route::middleware('tenant')->group(function () {
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+        Route::get('onboarding', [\App\Http\Controllers\Tenant\OnboardingController::class, 'show'])->name('onboarding.show');
+        Route::patch('onboarding/profile', [\App\Http\Controllers\Tenant\OnboardingController::class, 'updateProfile'])->name('onboarding.profile');
+        Route::post('onboarding/invite', [\App\Http\Controllers\Tenant\OnboardingController::class, 'invite'])->name('onboarding.invite');
+        Route::post('onboarding/finish', [\App\Http\Controllers\Tenant\OnboardingController::class, 'finish'])->name('onboarding.finish');
+
         Route::resource('students', StudentController::class);
         Route::resource('teachers', TeacherController::class)->except(['show']);
         Route::resource('classes', SchoolClassController::class)->except(['show']);

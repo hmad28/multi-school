@@ -13,6 +13,8 @@ type School = {
     address: string | null;
     status: string;
     trial_ends_at: string | null;
+    onboarding_completed: boolean;
+    onboarding_completed_at: string | null;
     users_count: number;
     students_count: number;
 };
@@ -108,8 +110,8 @@ function trialDaysLeft(dateStr: string | null): number {
             <div class="grid gap-4 md:grid-cols-4">
                 <div class="app-card p-5"><p class="text-sm text-slate-500">Status</p><span class="app-badge mt-3 capitalize" :class="statusClass(school.status)">{{ school.status }}</span></div>
                 <div class="app-card p-5"><p class="text-sm text-slate-500">Trial berakhir</p><p class="mt-3 text-xl font-bold text-ink dark:text-white">{{ formatDate(school.trial_ends_at) }}</p><p v-if="school.status === 'trial' && school.trial_ends_at" class="mt-1 text-sm font-semibold" :class="trialDaysLeft(school.trial_ends_at) <= 3 ? 'text-rose-600' : 'text-amber-600'">{{ trialDaysLeft(school.trial_ends_at) }} hari tersisa</p></div>
-                <div class="app-card p-5"><p class="text-sm text-slate-500">User</p><p class="mt-3 text-3xl font-bold text-ink dark:text-white">{{ school.users_count }}</p></div>
-                <div class="app-card p-5"><p class="text-sm text-slate-500">Siswa</p><p class="mt-3 text-3xl font-bold text-ink dark:text-white">{{ school.students_count }}</p></div>
+                <div class="app-card p-5"><p class="text-sm text-slate-500">Onboarding</p><span class="app-badge mt-3" :class="school.onboarding_completed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'">{{ school.onboarding_completed ? 'Selesai' : 'Belum selesai' }}</span><p v-if="school.onboarding_completed_at" class="mt-1 text-xs text-slate-400">{{ formatDate(school.onboarding_completed_at) }}</p></div>
+                <div class="app-card p-5"><p class="text-sm text-slate-500">User / Siswa</p><p class="mt-3 text-3xl font-bold text-ink dark:text-white">{{ school.users_count }} / {{ school.students_count }}</p></div>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-3">

@@ -23,6 +23,11 @@ Dibangun dengan Laravel 13 + Inertia 3 + Vue 3 + TypeScript. Modul operasional s
 | Poin Karakter — tipe poin, input, total per semester | ✅ |
 | Laporan PDF/Excel — absensi siswa/guru, pelanggaran, poin karakter, surat panggilan | ✅ |
 | Portal Wali Murid — dashboard, laporan absensi/pelanggaran/karakter per anak | ✅ |
+| Registrasi Mandiri — daftar sekolah dari marketing, verifikasi email, buat tenant+admin+katalog | ✅ |
+| Onboarding Wizard — checklist hub soft-gate: profil, tahun ajaran, kelas, siswa, undang user | ✅ |
+| Trial Management — expiry middleware 403, command reminder + auto-expire | ✅ |
+| Email Verification — MustVerifyEmail enforce, redirect ke onboarding setelah verifikasi | ✅ |
+| Trial Reminders — command notifikasi trial mau habis + auto-expire | ✅ |
 | Notifikasi & WhatsApp | ⏳ |
 
 ---

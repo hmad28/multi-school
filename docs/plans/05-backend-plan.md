@@ -135,14 +135,22 @@ ActivityLogger::log('tenant.suspended', '...', $user, $school, ['from' => 'trial
 
 ## 5. Auth & users
 
-### 5.1 Registrasi sekolah
+### 5.1 Registrasi sekolah & onboarding (GT1 — ✅ implemented)
 
-`RegisterSchoolAction`:
+`App\Actions\Registration\RegisterSchoolAction`:
 
-1. Validasi email belum ada (`users.email` unique).
-2. Transaction: create `schools` + slug unique + `users` admin + assign `admin-sekolah` with team.
-3. Kirim email verifikasi.
-4. Status school = `trial`, `trial_ends_at` = now + `config('platform.trial_days')` (default 14 hari).
+1. Validasi email belum ada (`users.email` unique) via `RegisterSchoolRequest`.
+2. Transaction: create `schools` + slug unique + trial `subscriptions` + `users` admin + assign `admin-sekolah` with team perms + `SeedDefaultCatalogAction` (katalog default per-tenant).
+3. `SchoolRegistrationController@store` fires `Registered` → kirim email verifikasi, login, redirect ke `verification.notice`.
+4. Status school = `trial`, `trial_ends_at` = now + `config('platform.trial_days')` (default 14 hari), `onboarding_step` = 0.
+
+Routes di domain central (`routes/web.php`): `GET/POST /daftar` (guest). CTA marketing → `site.appUrl + /daftar`.
+
+**Verifikasi email (enforced):** `User implements MustVerifyEmail`. `App\Support\PostAuthRedirect::for()` mengarahkan: super-admin → platform, admin sekolah onboarding belum selesai → `tenant.onboarding.show`, selain itu → `tenant.dashboard`. Dipakai `VerifyEmailController` + `EmailVerificationPromptController`.
+
+**Onboarding wizard (soft-gate):** `Tenant\OnboardingController` — checklist hub deteksi progres dari data nyata (profil, tahun ajaran aktif, kelas, siswa, undang user). Aksi inline `updateProfile` + `invite` (mengisi P2 follow-up school profile & user management). `finish` stamp `onboarding_completed_at`. Routes `tenant.onboarding.*` di grup `auth,verified`.
+
+**Trial reminders:** command `platform:trial-reminders {--days=3}` (`App\Console\Commands\SendTrialReminders`) kirim `TrialEndingReminder` ke admin + expire trial lewat tanggal → status `expired`. Dijadwalkan harian 07:00 di `routes/console.php`. `SchoolStatus::Expired` di-handle `TenantResolver` + `SetCurrentSchool` (403 pesan trial berakhir).
 
 ### 5.2 Login
 
@@ -202,12 +210,16 @@ app/Services/ActivityLogService.php
 ...
 ```
 
-Tambah:
+Tambah (✅ implemented kecuali ditandai):
 
 ```text
-app/Actions/Platform/RegisterSchoolAction.php
-app/Actions/Platform/SuspendSchoolAction.php
+app/Actions/Registration/RegisterSchoolAction.php   ← GT1 (bukan Actions/Platform)
+app/Actions/Catalog/SeedDefaultCatalogAction.php    ← katalog default per-tenant
+app/Console/Commands/SendTrialReminders.php         ← GT1 trial reminder + expiry
+app/Notifications/TrialEndingReminder.php           ← GT1
+app/Support/PostAuthRedirect.php                    ← GT1 routing pasca-verify
 app/Services/TenantResolver.php
+app/Actions/Platform/SuspendSchoolAction.php        ← belum (suspend via TenantController inline)
 ```
 
 ---
@@ -247,10 +259,11 @@ Local dev: `storage/app/public` dengan prefix yang sama.
 | Test | Assert |
 |------|--------|
 | `TenantIsolationTest` | User tenant A → GET student B = 403/404 |
-| `RegisterSchoolTest` | Creates school + admin + slug |
-| `DuplicateEmailTest` | Second register same email fails |
+| `SchoolRegistrationTest` ✅ | Register → school+admin+role+catalog+subscription; slug collision → `-2`; duplicate email ditolak; unverified admin → redirect verify; verified+onboarding → onboarding; finish stamp; profil/invite; trial reminder notif + expiry (10 test) |
 | `SuspendedSchoolTest` | Login blocked |
 | Port tests | Run pilot feature tests adapted |
+
+> **Catatan implementasi GT1:** `User` `#[Fillable]` semula tak menyertakan `email_verified_at`, sehingga seeder/test yang set field itu diam-diam di-drop. Tak berdampak sampai `MustVerifyEmail` di-enforce (GT1) → semua user seed jadi unverified. Diperbaiki: `email_verified_at` masuk fillable (registrasi tak pernah ambil dari input user, jadi aman).
 
 ---
 

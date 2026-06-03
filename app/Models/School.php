@@ -27,6 +27,8 @@ class School extends Model
         'logo_path',
         'timezone',
         'status',
+        'onboarding_step',
+        'onboarding_completed_at',
         'trial_ends_at',
         'principal_name',
         'principal_nip',
@@ -38,7 +40,14 @@ class School extends Model
         return [
             'status' => SchoolStatus::class,
             'trial_ends_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
+            'onboarding_step' => 'integer',
         ];
+    }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
     }
 
     public function users(): HasMany

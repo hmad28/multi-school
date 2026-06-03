@@ -6,7 +6,7 @@
 
 ---
 
-## 0. Status implementasi (terakhir diperbarui: 2026-06-03)
+## 0. Status implementasi (terakhir diperbarui: 2026-06-03 — GT1 core)
 
 | Phase | Status | Catatan |
 |-------|--------|---------|
@@ -16,7 +16,7 @@
 | **P2.5** Tenant dashboard alignment | ✅ Selesai baseline | Dashboard sekolah mengikuti struktur root pilot dan memakai ringkasan data P2; slot P3–P5 disiapkan |
 | **T1** Tenant app port | 🟡 Slice 1-8 selesai ✅ | Slice 1-8 semua ✅; Slice 9 berikutnya |
 | **PL1** Platform admin | ✅ Selesai | Dashboard founder, tenant list/detail, status, reset password, usage summary, trial ending soon, audit log (ActivityLogger), trial expiry middleware + countdown UI, billing ops manual (subscription list + status toggle). PL1 acceptance #1 (founder lihat aktivitas tenant) dan #2 (founder tidak bisa browse data siswa/guru) ✅ diverifikasi code. |
-| **GT1** Marketing + onboarding funnel | 🟡 Parsial | Marketing Astro selesai; backend register/onboarding belum nyambung |
+| **GT1** Marketing + onboarding funnel | 🟡 Core selesai ✅ | Registrasi sekolah mandiri (form Laravel + RegisterSchoolAction + verifikasi email enforced), onboarding wizard soft-gate 5 langkah, trial reminders command + expiry, visibility onboarding/trial di platform admin, CTA marketing → app. Email reminders butuh mail server di PRD. |
 | **PRD** Production | ⬜ Belum | Domain, deploy, monitoring, storage, billing production |
 
 **Cara menjalankan (lokal):**
@@ -62,6 +62,8 @@ Kolom siswa sebenarnya `name` (migrasi `2026_05_31_130003_create_students_table.
 - `StudentViolationController`, `StudentCharacterPointController`, `ReportController`, `GuardianDashboardController`, `StudentReportData`, `StudentAttendanceExport`, `ViolationExport`, `CharacterPointExport` (key prop Inertia `full_name` di `GuardianDashboardController`/`StudentReportData` tetap, hanya sumber `$student->name`).
 - Vue: `Violations/Students/{Index,Pending,Create}`, `CharacterPoints/Students/{Index,Create}`, `Reports/Index`.
 
+**Susulan C1 (Opus 4 re-audit 2026-06-03):** 3 sisa `$student?->full_name` accessor di `GuardianDashboardController` (latestAttendances/latestCharacterPoints/latestViolations, baris 68/81/93) terlewat dari fix pertama. Beda dari kasus MySQL — ini akses accessor pada model tanpa atribut `full_name` → diam-diam `null` di **semua** engine (SQLite & MySQL), jadi nama siswa kosong di 3 tabel "terbaru" dashboard wali. Test lama hijau karena cuma assert prop *ada*, tak pernah cek isi. Diperbaiki ke `->name`; `GuardianTest` diperkuat assert `children.0.full_name` & `latestAttendances.0.student_name` = nama siswa nyata (regression guard).
+
 Akar masalah: **test pakai SQLite, produksi MySQL 8**. SQLite memperlakukan identifier `"full_name"` yang tak dikenal sebagai *string literal* (`SELECT "full_name"` mengembalikan teks `'full_name'`, bukan error), sehingga test hijau **tidak menangkap** bug ini. Di MySQL → `Unknown column 'full_name'` → halaman 500. **Belum ditangani:** job CI yang jalan di MySQL (lihat MEDIUM).
 
 **C2 — Otorisasi portal wali murid pakai pencocokan nama fuzzy.** ✅ **DIPERBAIKI 2026-06-03**
@@ -70,7 +72,7 @@ Sebelumnya `GuardianStudentReportController` memberi akses bila `str_contains($s
 ### 🟡 MEDIUM
 
 - **Tabel katalog global bisa di-CRUD tenant**: ✅ **DIPERBAIKI 2026-06-03** — `violation_types`, `character_point_types`, `violation_thresholds` kini **per-tenant** (`school_id` + trait `BelongsToSchool`). Unique `violation_thresholds.points` → compound `(school_id, points)`. Default katalog di-seed per sekolah via `App\Actions\Catalog\SeedDefaultCatalogAction` (dipakai `PlatformSeeder`, seam untuk registrasi GT1). `ViolationSeeder` lama dihapus. Test isolasi katalog ditambah di `ViolationTest`/`CharacterPointTest`.
-- **Test engine ≠ produksi**: ✅ **DIPERBAIKI 2026-06-03** — ditambah job CI `php-tests-mysql` di `.github/workflows/tests.yml` (service MySQL 8.0, env DB level-job override `phpunit.xml` yang `force="false"`). Job SQLite existing tetap jalan paralel. Catatan: belum diverifikasi run penuh dari lokal (Docker daemon mati), akan jalan saat push. Total test: 116 passing, 2 skipped (domain routing), 506 assertions.
+- **Test engine ≠ produksi**: ✅ **DIPERBAIKI 2026-06-03** — ditambah job CI `php-tests-mysql` di `.github/workflows/tests.yml` (service MySQL 8.0, env DB level-job override `phpunit.xml` yang `force="false"`). Job SQLite existing tetap jalan paralel. Catatan: belum diverifikasi run penuh dari lokal (Docker daemon mati), akan jalan saat push. Total test: 126 passing, 2 skipped (domain routing), 549 assertions (termasuk GT1 SchoolRegistrationTest 10 test).
 - **Master data tanpa test**: ✅ **DIPERBAIKI 2026-06-03** — `tests/Feature/Tenant/MasterDataTest.php` (17 test): CRUD + validasi + isolasi lintas-tenant untuk Students, Teachers, Classes, Academic setup.
 - **Otorisasi tidak konsisten**: ✅ **DITINJAU 2026-06-03 — bukan celah, dijadikan konvensi.** Isolasi tenant dijamin 4 lapis: (1) middleware `SetCurrentSchool` set `TenantContext` + Spatie team, (2) global scope `BelongsToSchool` di semua model domain (route-binding/`findOrFail` lintas-tenant → 404), (3) Policy cek `school_id === TenantContext::id()`, (4) FormRequest scope `unique`/`exists` ke `TenantContext::id()`. Tiga gaya (Policy, `abort_unless(...can())` inline, FormRequest `authorize()`) adalah call-site berbeda dari cek izin yang sama, bukan gap. Konvensi: **master data & domain berbasis model → Policy; aksi katalog/operasional sederhana → inline `abort_unless`.** Dibuktikan oleh `MasterDataTest`, `ViolationTest`, `CharacterPointTest` (akses lintas-tenant ditolak 403/404). Refactor menyamakan gaya berisiko membuka celah tanpa manfaat keamanan → tidak dilakukan.
 
@@ -365,18 +367,18 @@ Nyambungin marketing page, registrasi sekolah, onboarding, dan dashboard tenant 
 ### Tasks
 
 - [x] Marketing Astro baseline: home, harga, daftar CTA
-- [ ] CTA `/daftar` → backend register school
-- [ ] Register school: PIC user, school name, slug/subdomain, email verify
-- [ ] Onboarding wizard 5 langkah: profil sekolah → tahun ajaran/semester → kelas → import siswa → undang user
-- [ ] Seed/default permission tenant baru setelah onboarding
-- [ ] Redirect selesai onboarding ke `tenant.dashboard`
-- [ ] Trial 14 hari + email reminders + platform admin visibility
-- [ ] Pricing/trial copy di marketing harus sama dengan behavior backend
+- [x] CTA `/daftar` → backend register school (marketing `site.appUrl` → Laravel `/daftar` Inertia form)
+- [x] Register school: PIC user, school name, slug/subdomain, email verify (RegisterSchoolAction + MustVerifyEmail enforced)
+- [x] Onboarding wizard 5 langkah: profil sekolah → tahun ajaran/semester → kelas → import siswa → undang user (soft-gate checklist hub, deteksi progress dari data nyata)
+- [x] Seed/default permission tenant baru setelah onboarding (RegisterSchoolAction sync admin-sekolah perms + SeedDefaultCatalogAction)
+- [x] Redirect selesai onboarding ke `tenant.dashboard` (PostAuthRedirect helper)
+- [x] Trial 14 hari + reminders (command `platform:trial-reminders` + TrialEndingReminder notif + expiry) + platform admin visibility (kolom onboarding/trial)
+- [x] Pricing/trial copy di marketing sama dengan behavior backend (trial 14 hari, plan map standar)
 
 ### Acceptance
 
-- Customer dari landing bisa daftar, verifikasi, onboarding, lalu masuk dashboard sekolah dengan data awal.
-- Platform admin bisa lihat status onboarding/trial customer tersebut.
+- [x] Customer dari landing bisa daftar, verifikasi, onboarding, lalu masuk dashboard sekolah dengan data awal (SchoolRegistrationTest 10 test)
+- [x] Platform admin bisa lihat status onboarding/trial customer tersebut (Tenants Index kolom Onboarding, Show stat card)
 
 ---
 
@@ -386,17 +388,17 @@ Nyambungin marketing page, registrasi sekolah, onboarding, dan dashboard tenant 
 
 - [x] Desain landing → implementasi **Astro** (`marketing/`) — home, harga, daftar
 - [ ] Deploy Astro (Nginx mini PC / Cloudflare — lihat ADR 0005)
-- [ ] CTA / form daftar → Laravel API (form `/daftar` masih menunggu backend)
-- [ ] Register school → email verify → create school + slug + subdomain
-- [ ] Onboarding wizard (5 langkah) sebagai jembatan marketing → dashboard tenant: profil sekolah, tahun ajaran, kelas, import siswa, undang user
-- [ ] Trial **14 hari** job + email reminders (`PLATFORM_TRIAL_DAYS`, selaras marketing)
+- [x] CTA / form daftar → Laravel (GT1: CTA marketing → `/daftar` Inertia, Opsi B)
+- [x] Register school → email verify → create school + slug (GT1; subdomain aktif saat PRD routing)
+- [x] Onboarding wizard sebagai jembatan marketing → dashboard tenant (GT1: checklist hub soft-gate)
+- [x] Trial **14 hari** + reminders command (GT1; email butuh mail server real di PRD)
 - [ ] Billing integration draft (Midtrans/Xendit) — bisa flag manual dulu
 - [ ] S3 storage prod; backup scheduled command
 
 ### Acceptance
 
-- Sekolah baru dari nol bisa go-live tanpa developer
-- Trial habis → read-only
+- Sekolah baru dari nol bisa go-live tanpa developer — ✅ flow lengkap di kode (GT1); verifikasi end-to-end di staging
+- Trial habis → read-only — ⚠️ saat ini trial habis → **403 (expired)**, bukan read-only; read-only mode didefer (lihat PL1 ADR)
 
 ---
 

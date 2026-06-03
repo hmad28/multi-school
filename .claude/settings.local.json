@@ -49,7 +49,12 @@
       "Bash(timeout 240 npm run build)",
       "Bash(echo \"BUILD EXIT: $?\")",
       "Bash(echo \"TSC EXIT: $?\")",
-      "Bash(npx vue-tsc *)"
+      "Bash(npx vue-tsc *)",
+      "Bash(echo \"TSC_EXIT=$?\")",
+      "Bash(npx astro *)",
+      "Bash(echo \"ASTRO_EXIT=$?\")",
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(git add *)"
     ]
   }
 }

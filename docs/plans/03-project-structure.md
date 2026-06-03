@@ -67,14 +67,17 @@ app/
 │   ├── Backup/
 │   ├── Imports/
 │   ├── Reports/
-│   └── Platform/             ← BARU: RegisterSchool, SuspendTenant, ...
+│   ├── Registration/          ← BARU: RegisterSchoolAction — ✅ (GT1)
+│   ├── Catalog/               ← SeedDefaultCatalogAction (katalog default per-tenant)
+│   └── Platform/             ← SuspendTenant, ... (suspend kini inline di TenantController)
 ├── Enums/
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Admin/
 │   │   ├── Attendance/
-│   │   ├── Platform/         ← SuperAdmin: TenantController, BillingController
-│   │   ├── Onboarding/     ← wizard steps
+│   │   ├── Platform/         ← SuperAdmin: TenantController, BillingController, DashboardController
+│   │   ├── Registration/     ← SchoolRegistrationController (daftar) — ✅ (GT1)
+│   │   ├── Tenant/           ← OnboardingController + modul tenant lain
 │   │   └── ...
 │   ├── Middleware/
 │   │   ├── HandleInertiaRequests.php
@@ -113,8 +116,9 @@ app/
 ```text
 resources/js/
 ├── Pages/
-│   ├── Platform/             ← Tenants/Index, Show, ...
-│   ├── Onboarding/           ← Step1..Step5
+│   ├── Platform/             ← Tenants/Index, Show, Billing/*, Dashboard
+│   ├── Onboarding/           ← Index (checklist hub soft-gate) — ✅ (GT1)
+│   ├── Auth/                 ← RegisterSchool (daftar sekolah) — ✅ (GT1)
 │   ├── Dashboard/
 │   ├── AcademicCalendar/
 │   │   └── Holidays/         ← Index, Create, Edit — ✅ (T1 Slice 1)

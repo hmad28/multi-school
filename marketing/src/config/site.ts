@@ -1,3 +1,6 @@
+/** Laravel app base URL. Override via PUBLIC_APP_URL at build time. */
+const appUrl = import.meta.env.PUBLIC_APP_URL ?? 'http://127.0.0.1:8888';
+
 export const site = {
 	name: 'Platform Sekolah',
 	tagline: 'Absensi, kedisiplinan, dan karakter murid — dalam satu platform.',
@@ -6,7 +9,9 @@ export const site = {
 	url: 'https://platformsekolah.id',
 	locale: 'id_ID',
 	contactEmail: 'halo@platformsekolah.id',
-	registerUrl: '/daftar',
+	appUrl,
+	/** School self-registration lives in the Laravel app (Inertia form + email verify). */
+	registerUrl: `${appUrl}/daftar`,
 	/** Trial marketing — batas hari diset di produk/backend nanti */
 	trialDays: 14,
 	trialLabel: 'Trial 14 hari — gratis, fitur Standar + preview AI',

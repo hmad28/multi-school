@@ -12,6 +12,7 @@ type SchoolRow = {
     email: string;
     status: string;
     trial_ends_at: string | null;
+    onboarding_completed: boolean;
     users_count: number;
     students_count: number;
 };
@@ -135,6 +136,7 @@ function resetPassword(school: SchoolRow) {
                                 <th>Sekolah</th>
                                 <th>Slug</th>
                                 <th>Status</th>
+                                <th>Onboarding</th>
                                 <th>Trial</th>
                                 <th>User / siswa</th>
                                 <th class="text-right">Aksi</th>
@@ -156,6 +158,11 @@ function resetPassword(school: SchoolRow) {
                                 <td>
                                     <span class="app-badge capitalize" :class="statusBadgeClass(school.status)">
                                         {{ school.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="app-badge" :class="school.onboarding_completed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'">
+                                        {{ school.onboarding_completed ? 'Selesai' : 'Belum' }}
                                     </span>
                                 </td>
                                 <td>{{ formatDate(school.trial_ends_at) }}</td>

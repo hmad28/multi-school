@@ -3,14 +3,20 @@ import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SectionLabel from '../components/ui/SectionLabel.astro';
+import Button from '../components/ui/Button.astro';
 import { site } from '../config/site';
 import { pricingTiers, formatRupiah } from '../config/pricing';
 
-const input =
-	'mt-2 w-full rounded-[var(--radius-btn)] border border-border-strong px-4 py-3 text-sm outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100';
-
 const paket = Astro.url.searchParams.get('paket');
+const billing = Astro.url.searchParams.get('billing');
 const selectedTier = pricingTiers.find((t) => t.id === paket);
+
+// Registration is handled by the Laravel app (Inertia form + email verification).
+// Forward any plan/billing selection so the app form can pre-select it.
+const params = new URLSearchParams();
+if (paket) params.set('paket', paket);
+if (billing) params.set('billing', billing);
+const registerHref = params.toString() ? `${site.registerUrl}?${params.toString()}` : site.registerUrl;
 ---
 
 <MarketingLayout title="Daftar sekolah" description={`Daftar Platform Sekolah — trial ${site.trialDays} hari atau berlangganan.`}>
@@ -42,63 +48,25 @@ const selectedTier = pricingTiers.find((t) => t.id === paket);
 				</p>
 			</div>
 
-			<form
+			<div
 				class="rounded-[var(--radius-card)] border border-border bg-canvas p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)] sm:p-8 lg:col-span-3"
-				action="#"
-				method="post"
 			>
-				<div class="space-y-5">
-					<div>
-						<label for="plan" class="text-sm font-semibold text-ink">Paket</label>
-						<select id="plan" name="plan" class={input}>
-							<option value="trial" selected={!paket}>
-								Trial — gratis {site.trialDays} hari
-							</option>
-							{
-								pricingTiers.map((tier) =>
-									tier.contactOnly ? (
-										<option value={tier.id} selected={paket === tier.id}>
-											{tier.name} — hubungi kami
-										</option>
-									) : (
-										<option value={tier.id} selected={paket === tier.id}>
-											{tier.name} — {formatRupiah(tier.monthlyIdr!)}/bulan
-										</option>
-									),
-								)
-							}
-						</select>
-					</div>
-					<div>
-						<label for="billing" class="text-sm font-semibold text-ink">Siklus bayar (setelah trial)</label>
-						<select id="billing" name="billing" class={input}>
-							<option value="monthly">Bulanan</option>
-							<option value="yearly">Tahunan (diskon)</option>
-						</select>
-					</div>
-					<div>
-						<label for="school_name" class="text-sm font-semibold text-ink">Nama sekolah</label>
-						<input id="school_name" name="school_name" type="text" required class={input} placeholder="SDIT Contoh" />
-					</div>
-					<div class="grid gap-5 sm:grid-cols-2">
-						<div>
-							<label for="admin_name" class="text-sm font-semibold text-ink">Nama admin</label>
-							<input id="admin_name" name="admin_name" type="text" required class={input} placeholder="Nama lengkap" />
-						</div>
-						<div>
-							<label for="admin_email" class="text-sm font-semibold text-ink">Email admin</label>
-							<input id="admin_email" name="admin_email" type="email" required class={input} placeholder="admin@sekolah.sch.id" />
-						</div>
-					</div>
-					<button
-						type="submit"
-						disabled
-						class="w-full cursor-not-allowed rounded-[var(--radius-btn)] bg-brand-800/50 py-3 text-sm font-semibold text-white"
-					>
-						Daftar sekolah (segera aktif)
-					</button>
+				<h2 class="text-xl font-semibold text-ink">Buat akun sekolah</h2>
+				<p class="mt-2 text-sm text-ink-muted">
+					Pendaftaran dilakukan di aplikasi Platform Sekolah. Anda akan mengisi nama sekolah, data admin (PIC),
+					dan memverifikasi email sebelum masuk ke onboarding.
+				</p>
+				<ul class="mt-6 space-y-3 text-sm text-ink">
+					<li class="flex gap-3"><span class="font-bold text-brand-700">1.</span> Isi nama sekolah & data admin</li>
+					<li class="flex gap-3"><span class="font-bold text-brand-700">2.</span> Verifikasi email PIC</li>
+					<li class="flex gap-3"><span class="font-bold text-brand-700">3.</span> Onboarding: profil, tahun ajaran, kelas, siswa</li>
+					<li class="flex gap-3"><span class="font-bold text-brand-700">4.</span> Trial {site.trialDays} hari langsung aktif</li>
+				</ul>
+				<div class="mt-8">
+					<Button href={registerHref} variant="primary" size="lg">Lanjut ke pendaftaran</Button>
 				</div>
-			</form>
+				<p class="mt-4 text-xs text-ink-muted">{site.existingClientHint}</p>
+			</div>
 		</div>
 	</main>
 	<Footer />

@@ -38,8 +38,8 @@ Pilot **bukan** nama SaaS; pilot adalah sumber utama app per sekolah/customer. M
 Ini misi utama `multi-school`, karena app operasional sekolah sudah punya pilot.
 
 - [x] Tabel `schools`, `subscriptions` (billing draft)
-- [ ] Marketing CTA → registrasi sekolah + verifikasi email PIC
-- [ ] Onboarding wizard (profil → TA → kelas → import → undang user)
+- [x] Marketing CTA → registrasi sekolah + verifikasi email PIC (GT1)
+- [x] Onboarding wizard (profil → TA → kelas → import → undang user) — soft-gate (GT1)
 - [x] Resolusi tenant via **subdomain** + middleware `SetCurrentSchool`
 - [x] Spatie Permission **teams** (`school_id`)
 - [x] `users.email` **UNIQUE global**; satu email = satu akun = satu sekolah

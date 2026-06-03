@@ -31,6 +31,7 @@ class TenantController extends Controller
                 'email' => $school->email,
                 'status' => $school->status->value,
                 'trial_ends_at' => $school->trial_ends_at?->toIso8601String(),
+                'onboarding_completed' => $school->hasCompletedOnboarding(),
                 'users_count' => $school->users_count,
                 'students_count' => $school->students_count,
             ]);
@@ -47,6 +48,7 @@ class TenantController extends Controller
                 SchoolStatus::Trial->value,
                 SchoolStatus::Active->value,
                 SchoolStatus::Suspended->value,
+                SchoolStatus::Expired->value,
             ])],
         ]);
 
@@ -115,6 +117,8 @@ class TenantController extends Controller
                 'address' => $school->address,
                 'status' => $school->status->value,
                 'trial_ends_at' => $school->trial_ends_at?->toIso8601String(),
+                'onboarding_completed' => $school->hasCompletedOnboarding(),
+                'onboarding_completed_at' => $school->onboarding_completed_at?->toIso8601String(),
                 'users_count' => $school->users_count,
                 'students_count' => $school->students_count,
             ],
