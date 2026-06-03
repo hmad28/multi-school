@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { AttendanceStatus, SchoolClass } from '@/types/domain';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 
-const props = defineProps<{ classes: any[]; statuses: any[]; rows: any[]; filters: { from: string; to: string; class_id?: string } }>();
+const props = defineProps<{ classes: SchoolClass[]; statuses: AttendanceStatus[]; rows: any[]; filters: { from: string; to: string; class_id?: string } }>();
 
 const from = ref(props.filters.from);
 const to = ref(props.filters.to);

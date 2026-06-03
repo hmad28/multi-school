@@ -11,6 +11,9 @@ Dibangun dengan Laravel 13 + Inertia 3 + Vue 3 + TypeScript. Modul operasional s
 | Modul | Status |
 |-------|--------|
 | Manajemen Tenant — dashboard super-admin, daftar sekolah, suspend/aktifkan, reset admin | ✅ |
+| Audit Log Platform — log otomatis reset password, suspend/aktifkan, perubahan status | ✅ |
+| Billing Manual — daftar subscription, filter status/paket, toggle status manual | ✅ |
+| Trial Expiry — middleware blokir akses saat trial habis, countdown di detail tenant | ✅ |
 | Master Data — siswa, guru, kelas, tahun ajaran, semester | ✅ |
 | Absensi Siswa — input harian per kelas, koreksi, rekap, finalize | ✅ |
 | Absensi QR — scan QR via kamera, session 10 menit, status terlambat otomatis | ✅ |
@@ -18,8 +21,8 @@ Dibangun dengan Laravel 13 + Inertia 3 + Vue 3 + TypeScript. Modul operasional s
 | Kalender Akademik — hari libur, periode akademik | ✅ |
 | Pelanggaran Siswa — tipe pelanggaran, input, validasi/tolak, ambang peringatan | ✅ |
 | Poin Karakter — tipe poin, input, total per semester | ✅ |
-| Laporan PDF/Excel | ⏳ |
-| Portal Wali Murid | ⏳ |
+| Laporan PDF/Excel — absensi siswa/guru, pelanggaran, poin karakter, surat panggilan | ✅ |
+| Portal Wali Murid — dashboard, laporan absensi/pelanggaran/karakter per anak | ✅ |
 | Notifikasi & WhatsApp | ⏳ |
 
 ---
@@ -80,8 +83,10 @@ Hosts file:
 
 ```bash
 php artisan test
-# 70+ tests — tenant isolation, CRUD, cross-tenant 403
+# 99 passing + 2 skipped — tenant isolation, CRUD, cross-tenant 403
 ```
+
+> ⚠️ **Catatan:** test jalan di SQLite `:memory:`, produksi pakai MySQL 8. Beberapa error nama kolom tidak tertangkap di SQLite. Lihat temuan audit di [`docs/plans/04-development-plan.md`](docs/plans/04-development-plan.md) §0.1 sebelum deploy ke MySQL.
 
 ---
 

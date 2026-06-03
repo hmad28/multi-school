@@ -120,6 +120,14 @@ const navGroups = computed(() => [
                 show: isPlatformRoute.value,
                 icon: 'graduation-cap',
             },
+            {
+                label: 'Billing',
+                shortLabel: 'Billing',
+                href: isPlatformRoute.value ? route('platform.billing.index') : '#',
+                active: route().current('platform.billing.*'),
+                show: isPlatformRoute.value,
+                icon: 'currency-dollar',
+            },
         ],
     },
     {
@@ -139,17 +147,17 @@ const navGroups = computed(() => [
             { label: 'Kalender Akademik', shortLabel: 'Kalender', href: tenantRoute('tenant.academic-calendar.holidays.index'), active: route().current('tenant.academic-calendar.*'), show: isTenantRoute.value, icon: 'calendar-check' },
             { label: 'Pelanggaran', shortLabel: 'Pelanggaran', href: tenantRoute('tenant.violation-types.index'), active: route().current('tenant.violation-types.*') || route().current('tenant.student-violations.*'), show: isTenantRoute.value, icon: 'shield-alert' },
             { label: 'Poin Karakter', shortLabel: 'Karakter', href: tenantRoute('tenant.student-character-points.index'), active: route().current('tenant.student-character-points.*') || route().current('tenant.character-point-types.*'), show: isTenantRoute.value, icon: 'heart-pulse' },
-            { label: 'Kirim WhatsApp', shortLabel: 'WA', href: '#', active: false, show: isTenantRoute.value, icon: 'send' },
-            { label: 'Notifikasi', shortLabel: 'Notif', href: '#', active: false, show: isTenantRoute.value, icon: 'alert-circle' },
+            { label: 'Kirim WhatsApp', shortLabel: 'WA', href: '#', active: false, show: false, icon: 'send' },
+            { label: 'Notifikasi', shortLabel: 'Notif', href: '#', active: false, show: false, icon: 'alert-circle' },
         ],
     },
     {
         label: 'Sistem',
         items: [
-            { label: 'Laporan', shortLabel: 'Laporan', href: '#', active: false, show: isTenantRoute.value, icon: 'file-text' },
-            { label: 'Backup', shortLabel: 'Backup', href: '#', active: false, show: isTenantRoute.value, icon: 'database-backup' },
-            { label: 'User', shortLabel: 'User', href: '#', active: false, show: isTenantRoute.value, icon: 'user-cog' },
-            { label: 'Pengaturan', shortLabel: 'Setting', href: '#', active: false, show: isTenantRoute.value, icon: 'settings' },
+            { label: 'Laporan', shortLabel: 'Laporan', href: tenantRoute('tenant.reports.index'), active: route().current('tenant.reports.*'), show: isTenantRoute.value, icon: 'file-text' },
+            { label: 'Backup', shortLabel: 'Backup', href: '#', active: false, show: false, icon: 'database-backup' },
+            { label: 'User', shortLabel: 'User', href: '#', active: false, show: false, icon: 'user-cog' },
+            { label: 'Pengaturan', shortLabel: 'Setting', href: '#', active: false, show: false, icon: 'settings' },
         ],
     },
 ]);

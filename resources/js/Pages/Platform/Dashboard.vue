@@ -96,7 +96,10 @@ function statusClass(status?: string): string {
                 <section class="app-card p-5">
                     <h2 class="font-bold text-slate-900 dark:text-slate-100">Estimasi MRR</h2>
                     <p class="mt-2 text-3xl font-bold text-ink dark:text-white">{{ formatCurrency(stats.monthlyRevenue) }}</p>
-                    <p class="mt-2 text-sm text-slate-500">Dari subscription aktif seed/manual. Payment gateway masuk tahap berikutnya.</p>
+                    <p class="mt-2 text-sm text-slate-500">Dari subscription aktif seed/manual.</p>
+                    <Link :href="route('platform.billing.index')" class="mt-3 inline-block text-sm font-semibold text-brand-700 hover:text-brand-600 dark:text-brand-400">
+                        Kelola billing →
+                    </Link>
                 </section>
                 <section class="app-card p-5">
                     <h2 class="font-bold text-slate-900 dark:text-slate-100">User / siswa</h2>

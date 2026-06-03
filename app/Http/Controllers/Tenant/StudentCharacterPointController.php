@@ -27,13 +27,13 @@ class StudentCharacterPointController extends Controller
 
         return Inertia::render('CharacterPoints/Students/Index', [
             'points' => StudentCharacterPoint::query()
-                ->with(['student:id,full_name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'characterPointType:id,name', 'recorder:id,name'])
+                ->with(['student:id,name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'characterPointType:id,name', 'recorder:id,name'])
                 ->when($studentId, fn ($query) => $query->where('student_id', $studentId))
                 ->when($category, fn ($query) => $query->where('category_snapshot', $category))
                 ->latest('date')
                 ->paginate(15)
                 ->withQueryString(),
-            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('full_name')->get(['id', 'full_name', 'nis', 'class_id']),
+            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'nis', 'class_id']),
             'filters' => $request->only('student_id', 'category'),
             'categories' => CharacterPointType::query()->where('status', 'active')->orderBy('category')->distinct()->pluck('category'),
             'totals' => $semester ? StudentCharacterPoint::query()
@@ -52,7 +52,7 @@ class StudentCharacterPointController extends Controller
         abort_unless($request->user()->can('character-points.input'), 403);
 
         return Inertia::render('CharacterPoints/Students/Create', [
-            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('full_name')->get(['id', 'full_name', 'nis', 'class_id']),
+            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'nis', 'class_id']),
             'types' => CharacterPointType::query()->where('status', 'active')->orderBy('sort_order')->get(['id', 'category', 'name', 'points']),
         ]);
     }

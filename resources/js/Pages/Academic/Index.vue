@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { AcademicLevel, AcademicYear } from '@/types/domain';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 
-const props = defineProps<{ levels: any[]; years: any[] }>();
+const props = defineProps<{ levels: AcademicLevel[]; years: AcademicYear[] }>();
 const page = usePage();
 const school = page.props.school as { slug: string };
 const levelForm = useForm({ name: '', numeric_value: 1 });

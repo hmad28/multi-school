@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('violation_types', function (Blueprint $table): void {
             $table->uuid('id')->primary();
+            $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
             $table->string('category', 30);
             $table->string('name', 150);
             $table->unsignedSmallInteger('points');
@@ -17,16 +18,18 @@ return new class extends Migration
             $table->unsignedSmallInteger('sort_order')->default(0)->index();
             $table->timestamps();
             $table->softDeletes();
-            $table->index(['category', 'status']);
+            $table->index(['school_id', 'category', 'status']);
         });
 
         Schema::create('violation_thresholds', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->unsignedSmallInteger('points')->unique();
+            $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
+            $table->unsignedSmallInteger('points');
             $table->string('label', 100);
             $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0)->index();
             $table->timestamps();
+            $table->unique(['school_id', 'points']);
         });
 
         Schema::create('student_violations', function (Blueprint $table): void {

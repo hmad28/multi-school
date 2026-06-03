@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { Student } from '@/types/domain';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import QRCode from 'qrcode';
 import { onMounted, ref } from 'vue';
 
-const props = defineProps<{ student: any; token: string; hadToken: boolean }>();
+const props = defineProps<{ student: Student; token: string; hadToken: boolean }>();
 const page = usePage();
 const payload = props.token;
 const qrDataUrl = ref('');
@@ -38,7 +39,7 @@ onMounted(async () => {
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <h2 class="text-xl font-black text-slate-900">{{ student.name }}</h2>
-                        <p class="mt-1 text-sm text-slate-500">{{ student.school_class?.name ?? student.schoolClass?.name }} · NIS {{ student.nis }}</p>
+                        <p class="mt-1 text-sm text-slate-500">{{ student.school_class?.name }} · NIS {{ student.nis }}</p>
                     </div>
                     <span class="app-badge" :class="hadToken ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'">{{ hadToken ? 'QR sudah ada' : 'QR baru dibuat' }}</span>
                 </div>

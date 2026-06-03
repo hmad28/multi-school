@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { SchoolClass } from '@/types/domain';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 
-const props = defineProps<{ classes: any[] }>();
+const props = defineProps<{ classes: SchoolClass[] }>();
 const page = usePage();
 const school = page.props.school as { slug: string };
 

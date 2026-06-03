@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { AttendanceStatus } from '@/types/domain';
 import { formatDateRange } from '@/lib/datetime';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -8,7 +9,7 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
 
-const props = defineProps<{ statuses: any[]; rows: any[]; filters: { from: string; to: string } }>();
+const props = defineProps<{ statuses: AttendanceStatus[]; rows: any[]; filters: { from: string; to: string } }>();
 const from = ref(props.filters.from);
 const to = ref(props.filters.to);
 const apply = () => router.get(route('tenant.attendance.teachers.recap', tenantParams()), { from: from.value, to: to.value }, { preserveState: true, preserveScroll: true, replace: true });

@@ -45,7 +45,28 @@ class CharacterPointTest extends TestCase
                 'sort_order' => 99,
             ])->assertRedirect();
 
-        $this->assertDatabaseHas('character_point_types', ['name' => 'Test poin']);
+        $this->assertDatabaseHas('character_point_types', [
+            'name' => 'Test poin',
+            'school_id' => $this->demo->id,
+        ]);
+    }
+
+    public function test_character_point_types_are_isolated_per_tenant(): void
+    {
+        $alfa = School::query()->where('slug', 'alfa')->firstOrFail();
+
+        TenantContext::set($alfa);
+        $alfaType = CharacterPointType::query()->firstOrFail();
+        TenantContext::clear();
+
+        $this->actingAs($this->demoAdmin)
+            ->get(route('tenant.character-point-types.index', ['tenant' => $this->demo->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('CharacterPoints/Types/Index')
+                ->where('types.data', fn ($types) => collect($types)->every(
+                    fn ($type) => $type['id'] !== $alfaType->id,
+                )));
     }
 
     public function test_student_character_point_page_loads(): void

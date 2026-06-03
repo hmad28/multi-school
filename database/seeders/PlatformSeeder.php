@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Catalog\SeedDefaultCatalogAction;
 use App\Enums\SchoolStatus;
 use App\Models\AcademicLevel;
 use App\Models\AcademicYear;
@@ -42,6 +43,9 @@ class PlatformSeeder extends Seeder
             'character-points.view',
             'character-points.input',
             'character-points.manage-types',
+            'reports.print',
+            'guardians.view-dashboard',
+            'guardians.view-child-reports',
         ];
 
         $demo = School::query()->create([
@@ -112,10 +116,54 @@ class PlatformSeeder extends Seeder
 
         $this->seedSchoolMasterData($demo, 'DEMO');
         $this->seedSchoolMasterData($alfa, 'ALFA');
+
+        $demoGuardian = User::query()->create([
+            'name' => 'Wali Demo',
+            'email' => 'wali@demo.test',
+            'password' => 'password',
+            'school_id' => $demo->id,
+            'email_verified_at' => now(),
+        ]);
+        setPermissionsTeamId($demo->id);
+        $demoWaliRole = Role::query()->firstOrCreate([
+            'name' => 'wali-murid',
+            'guard_name' => 'web',
+            'school_id' => $demo->id,
+        ]);
+        $demoWaliRole->syncPermissions(['guardians.view-dashboard', 'guardians.view-child-reports']);
+        $demoGuardian->assignRole($demoWaliRole);
+
+        $demoStudent = Student::query()->where('school_id', $demo->id)->first();
+        if ($demoStudent) {
+            $demoGuardian->guardianStudents()->attach($demoStudent->id, ['relationship' => 'Ayah']);
+        }
+
+        $alfaGuardian = User::query()->create([
+            'name' => 'Wali Alfa',
+            'email' => 'wali@alfa.test',
+            'password' => 'password',
+            'school_id' => $alfa->id,
+            'email_verified_at' => now(),
+        ]);
+        setPermissionsTeamId($alfa->id);
+        $alfaWaliRole = Role::query()->firstOrCreate([
+            'name' => 'wali-murid',
+            'guard_name' => 'web',
+            'school_id' => $alfa->id,
+        ]);
+        $alfaWaliRole->syncPermissions(['guardians.view-dashboard', 'guardians.view-child-reports']);
+        $alfaGuardian->assignRole($alfaWaliRole);
+
+        $alfaStudent = Student::query()->where('school_id', $alfa->id)->first();
+        if ($alfaStudent) {
+            $alfaGuardian->guardianStudents()->attach($alfaStudent->id, ['relationship' => 'Ayah']);
+        }
     }
 
     private function seedSchoolMasterData(School $school, string $prefix): void
     {
+        app(SeedDefaultCatalogAction::class)->execute($school);
+
         $year = AcademicYear::query()->create([
             'school_id' => $school->id,
             'name' => '2026/2027',

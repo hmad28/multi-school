@@ -73,7 +73,7 @@ app/
 │   ├── Controllers/
 │   │   ├── Admin/
 │   │   ├── Attendance/
-│   │   ├── Platform/         ← SuperAdmin: TenantController
+│   │   ├── Platform/         ← SuperAdmin: TenantController, BillingController
 │   │   ├── Onboarding/     ← wizard steps
 │   │   └── ...
 │   ├── Middleware/
@@ -92,6 +92,8 @@ app/
 │   ├── TenantContext.php     ← BARU: facade/container
 │   └── ...                   ← port
 └── Support/
+    ├── TenantContext.php     ← BARU: facade/container
+    └── ActivityLogger.php   ← BARU: static audit logging
 ```
 
 ### 3.1 Aturan layer
@@ -173,12 +175,17 @@ Route::post('/register', RegisterSchool);
 ## 6. Config `config/platform.php`
 
 ```php
+// Snippet selaras dengan config/platform.php aktual
 return [
-    'name' => env('APP_PLATFORM_NAME', 'Platform Sekolah'),
-    'tenant_domain' => env('TENANT_BASE_DOMAIN', 'platformsekolah.id'),
-    'trial_days' => 30,
-    'max_student_photo_kb' => 2048,
-    'max_violation_evidence_kb' => 4096,
+    'name' => env('PLATFORM_NAME', 'Platform Sekolah'),
+    'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'),
+    'trial_days' => (int) env('PLATFORM_TRIAL_DAYS', 14),
+    'tenant_base_domain' => env('TENANT_BASE_DOMAIN', 'platformsekolah.test'),
+    'admin_domain' => env('ADMIN_DOMAIN', 'admin.platformsekolah.test'),
+    'central_domains' => [...],            // env CENTRAL_DOMAINS, comma-separated
+    'marketing_url' => env('MARKETING_URL', 'http://127.0.0.1:4321'),
+    'use_path_routing' => env('PLATFORM_PATH_ROUTING', true),       // dev default
+    'use_subdomain_routing' => env('PLATFORM_SUBDOMAIN_ROUTING', false), // prod
 ];
 ```
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from '@/Components/App/Icon.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { SchoolClass } from '@/types/domain';
 import { formatDate } from '@/lib/datetime';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import jsQR from 'jsqr';
@@ -8,7 +9,7 @@ import { onBeforeUnmount, ref } from 'vue';
 
 type FeedbackKind = 'success' | 'error' | 'duplicate';
 
-const props = defineProps<{ classes: any[]; filters: { class_id: string; date: string; scan_type: 'arrival' | 'departure' } }>();
+const props = defineProps<{ classes: SchoolClass[]; filters: { class_id: string; date: string; scan_type: 'arrival' | 'departure' } }>();
 const page = usePage();
 const filter = useForm({ class_id: props.filters.class_id ?? '', date: props.filters.date, scan_type: props.filters.scan_type ?? 'arrival' });
 const scanForm = useForm({ student_token: '', date: filter.date, scan_type: filter.scan_type, force_update: false });

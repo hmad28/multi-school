@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from '@/Components/App/Icon.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { AttendanceStatus, SchoolClass } from '@/types/domain';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -8,13 +9,13 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 
 const props = defineProps<{
-    classes: any[];
-    statuses: any[];
-    selectedClass: any | null;
+    classes: SchoolClass[];
+    statuses: AttendanceStatus[];
+    selectedClass: SchoolClass | null;
     date: string;
     attendances: any[];
     submitted: boolean;
-    holiday: any | null;
+    holiday: { id: string; name: string; date: string } | null;
     lateCutoffPassed: boolean;
     effectiveSchoolDay: boolean;
     filters: { class_id: string; date: string; status_id: string; scan_state: 'scanned' | 'unscanned' | 'all' };

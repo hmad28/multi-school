@@ -2,6 +2,7 @@
 import Icon from '@/Components/App/Icon.vue';
 import Pagination from '@/Components/App/Pagination.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { CatalogType, Paginated } from '@/types/domain';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -9,8 +10,8 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
 
-defineProps<{ types: any; filters: { category?: string } }>();
-const openDetail = (type: any) => router.visit(route('tenant.violation-types.edit', { ...tenantParams(), violationType: type.id }));
+defineProps<{ types: Paginated<CatalogType>; filters: { category?: string } }>();
+const openDetail = (type: CatalogType) => router.visit(route('tenant.violation-types.edit', { ...tenantParams(), violationType: type.id }));
 
 const categoryClasses: Record<string, string> = {
     ringan: 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200',

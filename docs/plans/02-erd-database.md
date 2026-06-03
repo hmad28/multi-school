@@ -2,8 +2,8 @@
 
 > **Goal:** Skema database shared dengan isolasi `school_id`, tabel platform, dan aturan unique yang aman untuk SaaS.
 
-**DB:** MySQL 8.x  
-**PK domain:** UUID string  
+**DB:** MySQL 8.x (produksi) — ⚠️ test suite jalan di SQLite `:memory:`, lihat catatan §10  
+**PK domain:** UUID string (kecuali `users` — lihat §3.3)  
 **Pilot schema referensi:** `project-cahaya-sunnah/database/migrations`
 
 ---
@@ -84,18 +84,20 @@ erDiagram
 
 ### 3.3 `users` (akun login)
 
+> ⚠️ **Drift terhadap implementasi (per audit 2026-06-03):** tabel `users` aktual memakai **auto-increment `id` (bigint)** dari skeleton Breeze, **bukan UUID**. Kolom `teacher_id`, `status`, dan `deleted_at` **belum ada** — migrasi hanya menambah `school_id`. Tabel di bawah adalah target desain, belum tercapai sepenuhnya.
+
 | Kolom | Tipe | Constraints | Catatan |
 |-------|------|-------------|---------|
-| id | uuid | PK | |
+| id | bigint (aktual) / uuid (target) | PK | Aktual: auto-increment |
 | school_id | uuid | nullable FK | **null** hanya untuk `super-admin` |
-| name | varchar(100) | not null | |
-| email | varchar(150) | **unique global** | Satu email satu akun di seluruh platform |
+| name | varchar | not null | |
+| email | varchar(255) | **unique global** | Satu email satu akun di seluruh platform |
 | password | varchar(255) | not null | |
 | email_verified_at | timestamp | nullable | Wajib untuk aktivasi |
-| teacher_id | uuid | nullable FK | Link ke guru |
-| status | varchar(20) | default active | |
+| teacher_id | uuid | nullable FK | ⚠️ belum diimplementasi |
+| status | varchar(20) | default active | ⚠️ belum diimplementasi |
 | remember_token | varchar(100) | nullable | |
-| deleted_at | timestamp | nullable | |
+| deleted_at | timestamp | nullable | ⚠️ belum diimplementasi |
 
 **Tidak ada `school_user` di v1.**
 
@@ -120,28 +122,30 @@ Port dari pilot; tambahkan `school_id uuid not null` + FK ke `schools.id`:
 | `students` | `(school_id, nis)`, `(school_id, nisn)` nullable |
 | `academic_years` | `(school_id, name)` |
 | `semesters` | `(school_id, academic_year_id, name)` |
-| `violation_types` | — |
-| `violation_thresholds` | `(school_id, points)` |
+| `violation_types` | `(school_id, …)` — **per-tenant** (✅ 2026-06-03, `BelongsToSchool`) |
+| `violation_thresholds` | `(school_id, points)` unique — **per-tenant** (✅ 2026-06-03, sebelumnya global) |
 | `student_attendances` | `(school_id, student_id, date)` — ✅ T1 Slice 2
 | `attendance_class_submissions` | `(school_id, class_id, date)` — ✅ T1 Slice 2
 | `teacher_attendances` | `(school_id, teacher_id, date)` — ✅ T1 Slice 4
 | `teacher_attendance_submissions` | `(school_id, date)` — ✅ T1 Slice 4
 | `student_violations` | — |
-| `character_point_types` | — |
+| `character_point_types` | `(school_id, …)` — **per-tenant** (✅ 2026-06-03, `BelongsToSchool`) |
 | `student_character_points` | — |
 | `academic_calendar_holidays` | `(school_id, date)` |
 | `qr_attendance_sessions` | — ✅ T1 Slice 3 |
-| `school_notifications` | — |
-| `whatsapp_messages` | — |
-| `guardian_student` | `(school_id, user_id, student_id)` atau global pivot + scope |
-| `backup_logs` | — |
-| `activity_logs` | `school_id` nullable untuk aksi platform |
+| `school_notifications` | — ⏳ belum dimigrasi (fitur Notifikasi belum dibangun) |
+| `whatsapp_messages` | — ⏳ belum dimigrasi (fitur WhatsApp belum dibangun) |
+| `guardian_student` | aktual: unique `(user_id, student_id)` — **tanpa `school_id`** (isolasi lewat model terkait); ⚠️ berbeda dari rencana awal `(school_id, user_id, student_id)` |
+| `backup_logs` | — ⏳ belum dimigrasi (fitur Backup belum dibangun) |
+| `activity_logs` | `school_id` nullable untuk aksi platform — ✅ dimigrasi (PL1) |
 
 ### 4.1 Tabel global (tanpa `school_id`)
 
 - `attendance_statuses` — H/T/I/S/A master
 - `permissions`, `roles` — definisi
 - `schools`, `subscriptions`
+- `activity_logs` — `school_id` nullable (audit platform)
+- ✅ `violation_types`, `violation_thresholds`, `character_point_types` — **per-tenant sejak 2026-06-03** (sebelumnya global). Pindah ke daftar §4. Lihat §8.1.
 
 ---
 
@@ -179,6 +183,14 @@ INDEX (school_id, class_id) pada students, submissions
 - `platform_audit_logs` — aksi super-admin
 - `invoices`, `payment_webhooks` — billing
 - Per-tenant DB connection — hanya jika scale &gt; 500 sekolah
+
+---
+
+## 8.1 Catatan audit (review 2026-06-03)
+
+1. **SQLite vs MySQL** — test suite jalan di SQLite `:memory:`, produksi MySQL 8. SQLite memperlakukan identifier yang tak dikenal (mis. `"full_name"`) sebagai string literal, sehingga error nama kolom **lolos** di test tapi gagal di MySQL. Konkret: kode menanyakan `students.full_name` padahal kolom siswa bernama `name` → 500 di produksi. ✅ Referensi `full_name` siswa sudah diganti `name` (2026-06-03, detail: `04-development-plan.md` §0.1 C1). ⬜ Belum: satu job CI yang jalan di MySQL.
+2. **Katalog per-tenant** — ✅ **DIPERBAIKI 2026-06-03.** `violation_types`, `violation_thresholds`, `character_point_types` kini punya `school_id` + trait `BelongsToSchool`; unique threshold compound `(school_id, points)`. Default di-seed per sekolah via `App\Actions\Catalog\SeedDefaultCatalogAction`. Sebelumnya global dan bisa di-CRUD admin tenant lintas sekolah.
+3. **Drift skema didokumentasikan inline** di §3.3 (users) dan §4 (guardian_student).
 
 ---
 

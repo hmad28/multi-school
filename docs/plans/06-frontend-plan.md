@@ -64,7 +64,9 @@ resources/js/Pages/Platform/
 ├── Dashboard.vue      # founder summary: tenant status, MRR, trial ending soon, recent schools
 ├── Tenants/
 │   ├── Index.vue      # tabel: nama, slug, status, trial_ends_at, usage, actions
-│   └── Show.vue       # detail profil sekolah, subscription, users, actions
+│   └── Show.vue       # detail profil sekolah, subscription, users, activity log, actions
+├── Billing/
+│   └── Index.vue      # subscription list: filter by status/plan, status toggle manual
 └── Auth/
     └── Login.vue      # jika login terpisah di admin host
 ```
@@ -218,6 +220,7 @@ Port reusable dari pilot:
 Baru:
 
 - `Platform/TenantStatusBadge.vue`
+- `ActivityLog`, `ActivityLogger` (Support class — platform audit trail)
 - `Onboarding/StepIndicator.vue`
 
 ---
@@ -238,7 +241,7 @@ Hide tombol "Tambah Siswa" jika tidak punya `students.create`; route tetap prote
 | State | UI |
 |-------|-----|
 | School suspended | Halaman statis: hubungi Platform Sekolah |
-| Trial expired read-only | Banner + disable submit buttons |
+| Trial expired read-only | Banner + disable submit buttons (middleware blocks access with 403 + message) |
 | 404 subdomain | Halaman "Sekolah tidak ditemukan" |
 
 ---

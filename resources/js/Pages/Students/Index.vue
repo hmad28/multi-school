@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { Student } from '@/types/domain';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
 const school = page.props.school as { slug: string };
-const props = defineProps<{ students: any[] }>();
+const props = defineProps<{ students: Student[] }>();
 
 function destroyStudent(id: string): void {
     if (confirm('Hapus data siswa ini?')) {

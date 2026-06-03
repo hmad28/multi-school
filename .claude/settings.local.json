@@ -33,7 +33,23 @@
       "PowerShell(php vendor/bin/phpunit --display-skipped 2>&1 | Where-Object { $_ -match \"Skip|skip\" })",
       "PowerShell(php vendor/bin/phpunit --no-output 2>&1)",
       "PowerShell(git init *)",
-      "PowerShell(git add *)"
+      "PowerShell(git add *)",
+      "PowerShell(git branch *)",
+      "PowerShell(git *)",
+      "Bash(Select-Object -Last 3)",
+      "Bash(Select-String -Pattern \"SKIPPED|skipped\")",
+      "Bash(docker compose *)",
+      "Bash(php -r ' *)",
+      "Bash(python -c \"import yaml,sys; yaml.safe_load\\(open\\('.github/workflows/tests.yml'\\)\\); print\\('YAML valid'\\)\")",
+      "Bash(php -r \"echo 'no python, trying basic check'.PHP_EOL;\")",
+      "Bash(node_modules/.bin/vue-tsc --noEmit)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(echo \"REAL EXIT: $?\")",
+      "Read(//tmp/**)",
+      "Bash(timeout 240 npm run build)",
+      "Bash(echo \"BUILD EXIT: $?\")",
+      "Bash(echo \"TSC EXIT: $?\")",
+      "Bash(npx vue-tsc *)"
     ]
   }
 }

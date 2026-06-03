@@ -74,6 +74,7 @@ public static function clear(): void
 - Jalankan setelah `auth` pada route tenant.
 - Jika school tidak ditemukan → 404 branded.
 - Jika `suspended` → 403 halaman khusus.
+- Jika trial expired (`trial_ends_at` lewat) → 403 dengan pesan "Masa trial telah berakhir."
 - Set `TenantContext::set($school)`.
 - Set Spatie team id: `setPermissionsTeamId($school->id)`.
 
@@ -112,8 +113,23 @@ trait BelongsToSchool
 TenantContext::set($school);
 // ... query with scope OR withoutGlobalScope + explicit where school_id
 ActivityLog::logSuperAdminAction(...);
-TenantContext::clear();
+
+## 4.1 Activity Log
+
+Activity logging for platform actions (status changes, password resets):
+
+```php
+// app/Models/ActivityLog.php — UUID model
+// app/Support/ActivityLogger.php — static helper
+
+ActivityLogger::logStatusChange($school, $from, $to, $performedBy);
+ActivityLogger::logPasswordReset($admin, $performedBy);
+ActivityLogger::log('tenant.suspended', '...', $user, $school, ['from' => 'trial', 'to' => 'suspended']);
 ```
+
+- Logs stored in `activity_logs` table with `user_id`, `school_id`, `action`, `description`, `metadata` (JSON).
+- Displayed on tenant detail page (last 20 entries).
+- No event/listener overhead for v1 — direct static calls in controller.
 
 ---
 
@@ -126,7 +142,7 @@ TenantContext::clear();
 1. Validasi email belum ada (`users.email` unique).
 2. Transaction: create `schools` + slug unique + `users` admin + assign `admin-sekolah` with team.
 3. Kirim email verifikasi.
-4. Status school = `trial`, `trial_ends_at` = now + 30 days.
+4. Status school = `trial`, `trial_ends_at` = now + `config('platform.trial_days')` (default 14 hari).
 
 ### 5.2 Login
 
@@ -145,8 +161,12 @@ TenantContext::clear();
 | Controller | Method | Aksi |
 |------------|--------|------|
 | `Platform\TenantController` | index | List schools + filter |
-| | updateStatus | suspend / activate |
-| `Platform\TenantAdminController` | resetPassword | Reset admin sekolah |
+| | show | Detail tenant: profil, subscription, users, activity log |
+| | updateStatus | suspend/activate + audit log via ActivityLogger |
+| | resetPassword | Reset admin sekolah + audit log via ActivityLogger |
+| `Platform\BillingController` | index | List subscriptions + filter by status/plan |
+| | show | Detail subscription |
+| | updateStatus | Mark subscription active/past_due/canceled |
 
 Policies: hanya `super-admin`.
 

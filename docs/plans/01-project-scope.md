@@ -37,18 +37,18 @@ Pilot **bukan** nama SaaS; pilot adalah sumber utama app per sekolah/customer. M
 
 Ini misi utama `multi-school`, karena app operasional sekolah sudah punya pilot.
 
-- [ ] Tabel `schools`, `subscriptions` (billing draft)
+- [x] Tabel `schools`, `subscriptions` (billing draft)
 - [ ] Marketing CTA → registrasi sekolah + verifikasi email PIC
 - [ ] Onboarding wizard (profil → TA → kelas → import → undang user)
-- [ ] Resolusi tenant via **subdomain** + middleware `SetCurrentSchool`
-- [ ] Spatie Permission **teams** (`school_id`)
-- [ ] `users.email` **UNIQUE global**; satu email = satu akun = satu sekolah
-- [ ] Dashboard **super-admin**: lifecycle tenant, trial, onboarding, billing ops, suspend/read-only, reset admin
-- [ ] Audit log untuk aksi platform penting
+- [x] Resolusi tenant via **subdomain** + middleware `SetCurrentSchool`
+- [x] Spatie Permission **teams** (`school_id`)
+- [x] `users.email` **UNIQUE global**; satu email = satu akun = satu sekolah
+- [x] Dashboard **super-admin**: lifecycle tenant, trial, onboarding, billing ops, suspend/read-only, reset admin
+- [x] Audit log untuk aksi platform penting
 - [ ] Backup cloud terjadwal (per tenant / full DB sesuai keputusan ops)
 - [ ] Storage S3/R2: `schools/{school_id}/...`
 - [ ] CI/CD, HTTPS, Cloudflare DNS/tunnel
-- [ ] Automated tests **tenant isolation**
+- [x] Automated tests **tenant isolation**
 
 ---
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Pagination from '@/Components/App/Pagination.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { CatalogType, Paginated } from '@/types/domain';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -8,7 +9,7 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
 
-const props = defineProps<{ types: any; filters: { category?: string } }>();
+const props = defineProps<{ types: Paginated<CatalogType>; filters: { category?: string } }>();
 const category = ref(props.filters.category ?? '');
 const apply = () => router.get(route('tenant.character-point-types.index', tenantParams()), { category: category.value }, { preserveState: true, preserveScroll: true, replace: true });
 </script>

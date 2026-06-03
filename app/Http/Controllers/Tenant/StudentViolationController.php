@@ -28,13 +28,13 @@ class StudentViolationController extends Controller
 
         return Inertia::render('Violations/Students/Index', [
             'violations' => StudentViolation::query()
-                ->with(['student:id,full_name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'violationType:id,name', 'reporter:id,name', 'validator:id,name'])
+                ->with(['student:id,name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'violationType:id,name', 'reporter:id,name', 'validator:id,name'])
                 ->when($request->string('status')->toString(), fn ($query, string $status) => $query->where('status', $status))
                 ->when($request->string('student_id')->toString(), fn ($query, string $studentId) => $query->where('student_id', $studentId))
                 ->latest('date')
                 ->paginate(15)
                 ->withQueryString(),
-            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('full_name')->get(['id', 'full_name', 'nis', 'class_id']),
+            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'nis', 'class_id']),
             'filters' => $request->only('status', 'student_id'),
             'thresholds' => ViolationThreshold::query()->orderBy('sort_order')->get(['points', 'label']),
             'activeSemesterId' => $semester?->id,
@@ -46,7 +46,7 @@ class StudentViolationController extends Controller
         abort_unless($request->user()->can('violations.input'), 403);
 
         return Inertia::render('Violations/Students/Create', [
-            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('full_name')->get(['id', 'full_name', 'nis', 'class_id']),
+            'students' => Student::query()->with('schoolClass.academicLevel:id,name,numeric_value')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'nis', 'class_id']),
             'types' => ViolationType::query()->where('status', 'active')->orderBy('sort_order')->get(['id', 'category', 'name', 'points']),
         ]);
     }
@@ -67,7 +67,7 @@ class StudentViolationController extends Controller
 
         return Inertia::render('Violations/Students/Pending', [
             'violations' => StudentViolation::query()
-                ->with(['student:id,full_name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'violationType:id,name', 'reporter:id,name'])
+                ->with(['student:id,name,nis,class_id', 'student.schoolClass.academicLevel:id,name,numeric_value', 'violationType:id,name', 'reporter:id,name'])
                 ->where('status', 'pending')
                 ->latest('date')
                 ->paginate(15),

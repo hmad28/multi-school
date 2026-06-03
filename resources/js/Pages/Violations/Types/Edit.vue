@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from '@/Components/App/Icon.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { CatalogType } from '@/types/domain';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -8,7 +9,7 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
 
-const props = defineProps<{ type: any }>();
+const props = defineProps<{ type: CatalogType }>();
 const form = useForm({ category: props.type.category, name: props.type.name, points: props.type.points, status: props.type.status, sort_order: props.type.sort_order });
 const submit = () => form.put(route('tenant.violation-types.update', { ...tenantParams(), violationType: props.type.id }));
 const destroy = () => { if (confirm('Hapus jenis pelanggaran ini?')) router.delete(route('tenant.violation-types.destroy', { ...tenantParams(), violationType: props.type.id })); };

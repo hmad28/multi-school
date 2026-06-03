@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Platform;
 
 use App\Enums\SchoolStatus;
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\School;
 use App\Models\User;
+use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -38,36 +40,6 @@ class TenantController extends Controller
         ]);
     }
 
-    public function show(School $school): Response
-    {
-        $school->load(['subscriptions' => fn ($query) => $query->latest(), 'users' => fn ($query) => $query->latest()]);
-        $school->loadCount('users', 'students');
-
-        return Inertia::render('Platform/Tenants/Show', [
-            'school' => [
-                'id' => $school->id,
-                'name' => $school->name,
-                'slug' => $school->slug,
-                'email' => $school->email,
-                'phone' => $school->phone,
-                'address' => $school->address,
-                'status' => $school->status->value,
-                'trial_ends_at' => $school->trial_ends_at?->toIso8601String(),
-                'users_count' => $school->users_count,
-                'students_count' => $school->students_count,
-            ],
-            'subscription' => $school->subscriptions->first()?->only(['plan', 'period', 'starts_at', 'ends_at', 'status', 'amount']),
-            'admins' => $school->users
-                ->take(5)
-                ->map(fn (User $user): array => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'created_at' => $user->created_at?->toIso8601String(),
-                ]),
-        ]);
-    }
-
     public function updateStatus(Request $request, School $school): RedirectResponse
     {
         $validated = $request->validate([
@@ -78,7 +50,10 @@ class TenantController extends Controller
             ])],
         ]);
 
+        $oldStatus = $school->status->value;
         $school->update(['status' => $validated['status']]);
+
+        ActivityLogger::logStatusChange($school, $oldStatus, $validated['status'], $request->user());
 
         return back()->with('success', 'Status sekolah diperbarui.');
     }
@@ -104,9 +79,55 @@ class TenantController extends Controller
         }
 
         $password = Str::password(12);
-
         $admin->update(['password' => Hash::make($password)]);
 
+        ActivityLogger::logPasswordReset($admin, $request->user());
+
         return back()->with('success', "Password admin direset. Password sementara: {$password}");
+    }
+
+    public function show(School $school): Response
+    {
+        $school->load(['subscriptions' => fn ($query) => $query->latest(), 'users' => fn ($query) => $query->latest()]);
+        $school->loadCount('users', 'students');
+
+        $activityLogs = ActivityLog::query()
+            ->with('user')
+            ->where('school_id', $school->id)
+            ->latest()
+            ->take(20)
+            ->get()
+            ->map(fn (ActivityLog $log): array => [
+                'id' => $log->id,
+                'action' => $log->action,
+                'description' => $log->description,
+                'performed_by' => $log->user?->name ?? 'Sistem',
+                'created_at' => $log->created_at->toIso8601String(),
+            ]);
+
+        return Inertia::render('Platform/Tenants/Show', [
+            'school' => [
+                'id' => $school->id,
+                'name' => $school->name,
+                'slug' => $school->slug,
+                'email' => $school->email,
+                'phone' => $school->phone,
+                'address' => $school->address,
+                'status' => $school->status->value,
+                'trial_ends_at' => $school->trial_ends_at?->toIso8601String(),
+                'users_count' => $school->users_count,
+                'students_count' => $school->students_count,
+            ],
+            'subscription' => $school->subscriptions->first()?->only(['plan', 'period', 'starts_at', 'ends_at', 'status', 'amount']),
+            'admins' => $school->users
+                ->take(5)
+                ->map(fn (User $user): array => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'created_at' => $user->created_at?->toIso8601String(),
+                ]),
+            'activityLogs' => $activityLogs,
+        ]);
     }
 }

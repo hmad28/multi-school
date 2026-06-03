@@ -22,5 +22,8 @@ Route::middleware(['auth', 'platform.admin'])->group(function () {
     Route::get('tenants/{school}', [TenantController::class, 'show'])->name('tenants.show');
     Route::patch('tenants/{school}/status', [TenantController::class, 'updateStatus'])->name('tenants.status');
     Route::post('tenants/{school}/reset-password', [TenantController::class, 'resetPassword'])->name('tenants.reset-password');
+    Route::get('billing', [\App\Http\Controllers\Platform\BillingController::class, 'index'])->name('billing.index');
+    Route::get('billing/{subscription}', [\App\Http\Controllers\Platform\BillingController::class, 'show'])->name('billing.show');
+    Route::patch('billing/{subscription}/status', [\App\Http\Controllers\Platform\BillingController::class, 'updateStatus'])->name('billing.status');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

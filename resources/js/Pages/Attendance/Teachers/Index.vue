@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { AttendanceStatus, Teacher } from '@/types/domain';
 import { formatDate } from '@/lib/datetime';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
@@ -8,7 +9,7 @@ const page = usePage();
 const school = computed(() => page.props.school as { slug: string });
 const tenantParams = (extra = {}) => ({ tenant: school.value.slug, ...extra });
 
-const props = defineProps<{ date: string; statuses: any[]; teachers: any[]; attendances: Record<string, any>; submitted: boolean }>();
+const props = defineProps<{ date: string; statuses: AttendanceStatus[]; teachers: Teacher[]; attendances: Record<string, any>; submitted: boolean }>();
 const present = computed(() => props.statuses.find((status) => status.code === 'H')?.id ?? props.statuses[0]?.id);
 const form = useForm({ date: props.date, attendances: [] as any[] });
 

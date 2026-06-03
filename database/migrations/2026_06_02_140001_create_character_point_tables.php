@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('character_point_types', function (Blueprint $table): void {
             $table->uuid('id')->primary();
+            $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
             $table->string('category', 30);
             $table->string('name', 150);
             $table->unsignedSmallInteger('points');
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('sort_order')->default(0)->index();
             $table->timestamps();
             $table->softDeletes();
-            $table->index(['category', 'status']);
+            $table->index(['school_id', 'category', 'status']);
         });
 
         Schema::create('student_character_points', function (Blueprint $table): void {

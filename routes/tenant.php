@@ -22,6 +22,7 @@ use App\Http\Controllers\Tenant\StudentCharacterPointController;
 use App\Http\Controllers\Tenant\TeacherAttendanceController;
 use App\Http\Controllers\Tenant\TeacherController;
 use App\Http\Controllers\Tenant\ViolationTypeController;
+use App\Http\Controllers\Tenant\ReportController;
 use App\Http\Controllers\Tenant\StudentViolationController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,6 +57,9 @@ Route::middleware('tenant')->group(function () {
         Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
         Route::put('password', [PasswordController::class, 'update'])->name('password.update');
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+        Route::get('guardian/dashboard', [\App\Http\Controllers\Tenant\GuardianDashboardController::class, '__invoke'])->name('guardian.dashboard');
+        Route::get('guardian/students/{student}', [\App\Http\Controllers\Tenant\GuardianStudentReportController::class, '__invoke'])->name('guardian.students.show');
     });
 
     Route::middleware(['auth', 'verified'])->group(function () {
@@ -114,5 +118,15 @@ Route::middleware('tenant')->group(function () {
         Route::resource('student-character-points', StudentCharacterPointController::class)
             ->names('student-character-points')
             ->only(['index', 'create', 'store']);
+
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/student-attendance', [ReportController::class, 'studentAttendance'])->name('reports.student-attendance');
+        Route::get('reports/student-attendance/excel', [ReportController::class, 'studentAttendanceExcel'])->name('reports.student-attendance.excel');
+        Route::get('reports/teacher-attendance', [ReportController::class, 'teacherAttendance'])->name('reports.teacher-attendance');
+        Route::get('reports/teacher-attendance/excel', [ReportController::class, 'teacherAttendanceExcel'])->name('reports.teacher-attendance.excel');
+        Route::get('reports/violations', [ReportController::class, 'violations'])->name('reports.violations');
+        Route::get('reports/violations/excel', [ReportController::class, 'violationsExcel'])->name('reports.violations.excel');
+        Route::get('reports/character-points/excel', [ReportController::class, 'characterPointsExcel'])->name('reports.character-points.excel');
+        Route::get('reports/parent-call-letter', [ReportController::class, 'parentCallLetter'])->name('reports.parent-call-letter');
     });
 });

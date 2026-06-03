@@ -6,16 +6,16 @@
 
 ---
 
-## 0. Status implementasi (terakhir diperbarui: 2026-06-02)
+## 0. Status implementasi (terakhir diperbarui: 2026-06-03)
 
 | Phase | Status | Catatan |
 |-------|--------|---------|
 | **P0** Bootstrap | ✅ Selesai | Laravel 13, Breeze Inertia Vue TS, Docker Compose, domain routing, CI |
 | **P1** Tenancy | ✅ Selesai | schools, resolver, middleware, tenant-aware auth/routes, dashboard brand polish, super-admin tenants UI, seed demo+alfa |
-| **P2** Master data | 🟡 Core selesai | Schema, model, permission, CRUD siswa/guru/kelas/akademik, seed demo, tests/build hijau; import/settings/user tenant menyusul |
+| **P2** Master data | 🟡 Core ✅, 3 deferred | Schema, model, permission, CRUD siswa/guru/kelas/akademik, seed demo, tests/build hijau; NIS duplicate test ✅. Import/settings/user tenant deferred (P2 follow-up). |
 | **P2.5** Tenant dashboard alignment | ✅ Selesai baseline | Dashboard sekolah mengikuti struktur root pilot dan memakai ringkasan data P2; slot P3–P5 disiapkan |
-| **T1** Tenant app port | 🟡 Slice 1-6 selesai ✅ | Slice 1 Kalender Akademik ✅, Slice 2 Absensi Siswa ✅, Slice 3 QR Attendance ✅, Slice 4 Absensi Guru ✅, Slice 5 Pelanggaran ✅, Slice 6 Poin Karakter ✅; Slice 7-9 berikutnya |
-| **PL1** Platform admin | 🟡 Baseline selesai | Dashboard founder, tenant list/detail, status, reset password, usage summary, trial ending soon sudah ada; audit/billing ops menyusul |
+| **T1** Tenant app port | 🟡 Slice 1-8 selesai ✅ | Slice 1-8 semua ✅; Slice 9 berikutnya |
+| **PL1** Platform admin | ✅ Selesai | Dashboard founder, tenant list/detail, status, reset password, usage summary, trial ending soon, audit log (ActivityLogger), trial expiry middleware + countdown UI, billing ops manual (subscription list + status toggle). PL1 acceptance #1 (founder lihat aktivitas tenant) dan #2 (founder tidak bisa browse data siswa/guru) ✅ diverifikasi code. |
 | **GT1** Marketing + onboarding funnel | 🟡 Parsial | Marketing Astro selesai; backend register/onboarding belum nyambung |
 | **PRD** Production | ⬜ Belum | Domain, deploy, monitoring, storage, billing production |
 
@@ -48,6 +48,37 @@ Setelah ubah routing: `php artisan config:clear` lalu restart `php artisan serve
 127.0.0.1 admin.platformsekolah.test
 127.0.0.1 demo.platformsekolah.test
 ```
+
+---
+
+## 0.1 Temuan audit (review 2026-06-03)
+
+Hasil review menyeluruh codebase. C1, C2, dan katalog per-tenant **sudah diperbaiki** (2026-06-03). Sisanya dicatat agar tidak hilang.
+
+### 🔴 CRITICAL
+
+**C1 — Query kolom `full_name` pada tabel `students` akan error di produksi (MySQL).** ✅ **DIPERBAIKI 2026-06-03**
+Kolom siswa sebenarnya `name` (migrasi `2026_05_31_130003_create_students_table.php:14`), bukan `full_name`. Tabel yang punya `full_name` hanya `teachers`. `full_name` dipakai untuk *student* di 9 file PHP + 6 file Vue — semua sudah diganti ke `name`:
+- `StudentViolationController`, `StudentCharacterPointController`, `ReportController`, `GuardianDashboardController`, `StudentReportData`, `StudentAttendanceExport`, `ViolationExport`, `CharacterPointExport` (key prop Inertia `full_name` di `GuardianDashboardController`/`StudentReportData` tetap, hanya sumber `$student->name`).
+- Vue: `Violations/Students/{Index,Pending,Create}`, `CharacterPoints/Students/{Index,Create}`, `Reports/Index`.
+
+Akar masalah: **test pakai SQLite, produksi MySQL 8**. SQLite memperlakukan identifier `"full_name"` yang tak dikenal sebagai *string literal* (`SELECT "full_name"` mengembalikan teks `'full_name'`, bukan error), sehingga test hijau **tidak menangkap** bug ini. Di MySQL → `Unknown column 'full_name'` → halaman 500. **Belum ditangani:** job CI yang jalan di MySQL (lihat MEDIUM).
+
+**C2 — Otorisasi portal wali murid pakai pencocokan nama fuzzy.** ✅ **DIPERBAIKI 2026-06-03**
+Sebelumnya `GuardianStudentReportController` memberi akses bila `str_contains($student->guardian_name, $user->name)`, dan `GuardianDashboardController` fallback `where guardian_name like %name%` lalu auto-link via `syncWithoutDetaching` → "Ana" cocok "Anastasia"/"Diana" → kebocoran lintas-keluarga. **Perbaikan:** fuzzy fallback + auto-link dihapus total. Akses kini **hanya** lewat pivot `guardian_student` eksplisit; tanpa link → dashboard kosong / 403. Pivot di-seed saat registrasi/onboarding (atau manual oleh admin).
+
+### 🟡 MEDIUM
+
+- **Tabel katalog global bisa di-CRUD tenant**: ✅ **DIPERBAIKI 2026-06-03** — `violation_types`, `character_point_types`, `violation_thresholds` kini **per-tenant** (`school_id` + trait `BelongsToSchool`). Unique `violation_thresholds.points` → compound `(school_id, points)`. Default katalog di-seed per sekolah via `App\Actions\Catalog\SeedDefaultCatalogAction` (dipakai `PlatformSeeder`, seam untuk registrasi GT1). `ViolationSeeder` lama dihapus. Test isolasi katalog ditambah di `ViolationTest`/`CharacterPointTest`.
+- **Test engine ≠ produksi**: ✅ **DIPERBAIKI 2026-06-03** — ditambah job CI `php-tests-mysql` di `.github/workflows/tests.yml` (service MySQL 8.0, env DB level-job override `phpunit.xml` yang `force="false"`). Job SQLite existing tetap jalan paralel. Catatan: belum diverifikasi run penuh dari lokal (Docker daemon mati), akan jalan saat push. Total test: 116 passing, 2 skipped (domain routing), 506 assertions.
+- **Master data tanpa test**: ✅ **DIPERBAIKI 2026-06-03** — `tests/Feature/Tenant/MasterDataTest.php` (17 test): CRUD + validasi + isolasi lintas-tenant untuk Students, Teachers, Classes, Academic setup.
+- **Otorisasi tidak konsisten**: ✅ **DITINJAU 2026-06-03 — bukan celah, dijadikan konvensi.** Isolasi tenant dijamin 4 lapis: (1) middleware `SetCurrentSchool` set `TenantContext` + Spatie team, (2) global scope `BelongsToSchool` di semua model domain (route-binding/`findOrFail` lintas-tenant → 404), (3) Policy cek `school_id === TenantContext::id()`, (4) FormRequest scope `unique`/`exists` ke `TenantContext::id()`. Tiga gaya (Policy, `abort_unless(...can())` inline, FormRequest `authorize()`) adalah call-site berbeda dari cek izin yang sama, bukan gap. Konvensi: **master data & domain berbasis model → Policy; aksi katalog/operasional sederhana → inline `abort_unless`.** Dibuktikan oleh `MasterDataTest`, `ViolationTest`, `CharacterPointTest` (akses lintas-tenant ditolak 403/404). Refactor menyamakan gaya berisiko membuka celah tanpa manfaat keamanan → tidak dilakukan.
+
+### 🟢 LOW
+
+- ✅ **DIPERBAIKI 2026-06-03** — 5 nav placeholder `href: '#'` (WhatsApp, Notifikasi, Backup, User, Pengaturan) di `AuthenticatedLayout.vue` di-set `show: false` (disembunyikan sampai fiturnya dibangun), bukan dibiarkan clickable-mati.
+- ✅ **DIPERBAIKI 2026-06-03** — Prop TypeScript `any` (~42x). Dibuat `resources/js/types/domain.ts` (Student, Teacher, SchoolClass, AcademicLevel/Year, Semester, CatalogType, AttendanceStatus, Paginated<T>, dll). 23 prop entitas di-type ulang. Sisa 6 `any` sengaja dipertahankan untuk row view-model denormalisasi (hasil join/agregat: `rows`, `attendances`, `Paginated<any>`) — typing presisi rapuh tanpa manfaat. **Bonus temuan kritis:** `vue-tsc` exit 2 (build `vue-tsc && vite build` rusak) karena 5 halaman impor `@/Components/App/Pagination.vue` yang **tidak ada filenya**. Komponen dibuat; `vue-tsc` kini exit 0, `npm run build` hijau.
+- ✅ **DIPERBAIKI 2026-06-03** — `tests/Unit/ExampleTest.php` & `tests/Feature/ExampleTest.php` scaffolding dihapus.
 
 ---
 
@@ -91,7 +122,7 @@ Setelah ubah routing: `php artisan config:clear` lalu restart `php artisan serve
 ### Acceptance
 
 - [x] Login page di `http://platformsekolah.test` dan `http://demo.platformsekolah.test` resolve (meski 404 tenant OK)
-- [x] `php artisan test` green (smoke) — 28 tests
+- [x] `php artisan test` green (smoke) — 28 tests (116 passing di fase PL1)
 
 ---
 
@@ -106,7 +137,7 @@ Setelah ubah routing: `php artisan config:clear` lalu restart `php artisan serve
 - [x] `BelongsToSchool` trait + model `Student` (contoh isolasi)
 - [x] Platform UI: `Pages/Platform/Tenants/Index` — list, suspend, activate
 - [x] Reset password admin sekolah (flash password sementara)
-- [ ] Audit log reset password (P2+)
+- [x] Audit log reset password (selesai di PL1 — `ActivityLogger`)
 - [x] Tests: `TenantIsolationTest`, `SuperAdminCanListTenantsTest`
 - [x] Dev routes path: `/t/{slug}/…`, `/platform/…` (tanpa hosts)
 - [x] Tenant-aware shared Inertia props (`school`, roles, permissions)
@@ -135,16 +166,16 @@ Setelah ubah routing: `php artisan config:clear` lalu restart `php artisan serve
 - [x] Port controllers, requests, policies (scoped)
 - [x] Core Inertia pages: siswa, guru, kelas, akademik
 - [x] Seed demo/alfa master data + team-scoped permissions
-- [ ] Import Excel siswa + template
-- [ ] School profile edit (= fields di `schools` atau settings 1:1)
-- [ ] User management per tenant (assign role with team_id)
+- [ ] Import Excel siswa + template — **deferred: P2 follow-up**
+- [ ] School profile edit (= fields di `schools` atau settings 1:1) — **deferred: P2 follow-up**
+- [ ] User management per tenant (assign role with team_id) — **deferred: P2 follow-up**
 
 ### Acceptance
 
 - [x] Admin tenant CRUD siswa/guru/kelas/akademik dasar
 - [x] Dashboard tenant membaca jumlah siswa/guru/kelas dan tahun ajaran/semester aktif dari data tenant
-- [ ] NIS duplikat **dalam sekolah sama** ditolak; NIS sama di sekolah lain **boleh** perlu test eksplisit baru
-- [ ] Import 100 baris dengan validasi per baris
+- [x] NIS duplikat **dalam sekolah sama** ditolak (StoreStudentRequest unique + school_id scope, test MasterDataTest.php:85)
+- [ ] Import 100 baris dengan validasi per baris — **deferred: P2 follow-up**
 
 ---
 
@@ -161,7 +192,7 @@ Dashboard per sekolah (`tenant.dashboard`) harus mengikuti sistem root pilot `C:
 - [x] Rework `resources/js/Pages/Dashboard.vue` untuk mode tenant: hero sekolah, KPI operasional, shortcut modul, panel aktivitas/empty state
 - [x] Pastikan sidebar route master data dan dashboard saling nyambung
 - [x] Update test Inertia dashboard untuk shared prop + metrics tenant
-- [ ] Pisahkan tampilan central/platform jika nanti dashboard pusat butuh halaman sendiri
+- [ ] Pisahkan tampilan central/platform jika nanti dashboard pusat butuh halaman sendiri — **deferred: not needed yet, platform dashboard is standalone at /platform/dashboard**
 
 ### Acceptance
 
@@ -278,6 +309,31 @@ Bagian per sekolah/customer bukan product discovery baru. App tenant harus conte
 - [x] Seed 9 character point types (akhlak/ibadah/sosial/kedisiplinan/akademik)
 - [x] Tests: 5 tests (index type, create type, student index, student create, cross-tenant 403)
 
+#### Slice 7 — Reports (PDF/Excel) ✅
+
+- [x] Blade PDF templates: layout (letterhead from `TenantContext::school()`), student-attendance, teacher-attendance, violations, parent-call-letter
+- [x] Excel export classes: `StudentAttendanceExport`, `TeacherAttendanceExport`, `ViolationExport`, `CharacterPointExport` (FromCollection, ShouldAutoSize, WithHeadings, WithMapping)
+- [x] `ReportController` with 9 public methods: index, 3 PDF (student-attendance, teacher-attendance, violations), 3 Excel (student-attendance, teacher-attendance, violations) + characterPointsExcel + parentCallLetter, plus private `download()` helper
+- [x] Inertia page `Reports/Index.vue`: filter bar (date range, class, status), 4 report cards (PDF/Excel buttons), parent call letter section
+- [x] Routes: 9 routes under `auth,verified` group (`reports.*`)
+- [x] Permission `reports.print` in `admin-sekolah`
+- [x] Sidebar nav item Laporan → route live (`tenant.reports.*`)
+- [x] Tests: 11 tests (page loads, 7 PDF/Excel downloads, unauth block, auth redirect)
+
+#### Slice 8 — Guardian / Wali Murid Portal ✅
+
+- [x] Migration: `guardian_student` pivot table (user_id, student_id, relationship)
+- [x] Model relationships: `User.guardianStudents()`, `Student.guardianUsers()` via BelongsToMany
+- [x] Services: `StudentReportData`, `ViolationPointService`, `CharacterPointService` (ported from pilot)
+- [x] `GuardianDashboardController` — children via guardianStudents(), attendance summary month-to-date, latest records, fallback to guardian_name match
+- [x] `GuardianStudentReportController` — validate linked child OR fallback, build report via StudentReportData
+- [x] Vue pages: `Guardian/Dashboard.vue` (hero banner, KPI cards, attendance summary, tables), `Guardian/StudentShow.vue` (student profile, point cards, filterable reports)
+- [x] Routes: 2 guardian routes in `auth` group (`tenant.guardian.*`)
+- [x] Permissions: `guardians.view-dashboard`, `guardians.view-child-reports`
+- [x] Role `wali-murid` created per school with guardian permissions
+- [x] Seeds: wali@demo.test + wali@alfa.test users with linked students
+- [x] Tests: 5 tests (dashboard loads, child report viewable, unlinked child 404, unauth forbidden, admin forbidden)
+
 ## 7. PL1 — Platform admin layer
 
 ### Goal
@@ -289,9 +345,9 @@ Bangun dashboard admin/founder untuk mengelola lifecycle pelanggan tanpa mengelo
 - [x] Tenant list/status/suspend/activate/reset admin password baseline
 - [x] Tenant detail page: profil sekolah, subscription/trial, user tenant, usage summary non-sensitif
 - [x] Platform dashboard: jumlah tenant trial/active/suspended, trial ending soon, recent signups, estimasi MRR seed/manual
-- [ ] Audit log untuk reset password, suspend/activate, billing status changes
-- [ ] Trial/read-only controls yang nyambung ke tenant middleware/UI
-- [ ] Billing ops manual draft sebelum payment gateway
+- [x] Audit log untuk reset password, suspend/activate, billing status changes — ActivityLogger (+ BillingShow.vue audit gap fixed 2026-06-03)
+- [-] Trial/read-only controls — **trial expiry middleware selesai** (expired → 403). Read-only mode (view tapi nggak bisa edit) sengaja didefer ke GT1/PRD karena perlu middleware di semua write route dan belum ada grace period post-trial. Lihat ADR PL1.
+- [x] Billing ops manual — BillingController, rute, Index.vue, Show.vue (dibuat 2026-06-03)
 
 ### Acceptance
 

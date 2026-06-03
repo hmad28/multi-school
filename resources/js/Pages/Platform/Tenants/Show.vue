@@ -26,10 +26,19 @@ type Subscription = {
     amount: string | number;
 } | null;
 
+type ActivityLogRow = {
+    id: string;
+    action: string;
+    description: string;
+    performed_by: string;
+    created_at: string;
+};
+
 defineProps<{
     school: School;
     subscription: Subscription;
     admins: { id: string; name: string; email: string; created_at: string | null }[];
+    activityLogs: ActivityLogRow[];
 }>();
 
 const page = usePage();
@@ -60,6 +69,12 @@ function updateStatus(school: School, status: string): void {
 function resetPassword(school: School): void {
     if (!confirm(`Reset password admin untuk ${school.name}?`)) return;
     router.post(route('platform.tenants.reset-password', school.id), {}, { preserveScroll: true });
+}
+
+function trialDaysLeft(dateStr: string | null): number {
+    if (!dateStr) return 0;
+    const diff = new Date(dateStr).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 </script>
 
@@ -92,7 +107,7 @@ function resetPassword(school: School): void {
 
             <div class="grid gap-4 md:grid-cols-4">
                 <div class="app-card p-5"><p class="text-sm text-slate-500">Status</p><span class="app-badge mt-3 capitalize" :class="statusClass(school.status)">{{ school.status }}</span></div>
-                <div class="app-card p-5"><p class="text-sm text-slate-500">Trial berakhir</p><p class="mt-3 text-xl font-bold text-ink dark:text-white">{{ formatDate(school.trial_ends_at) }}</p></div>
+                <div class="app-card p-5"><p class="text-sm text-slate-500">Trial berakhir</p><p class="mt-3 text-xl font-bold text-ink dark:text-white">{{ formatDate(school.trial_ends_at) }}</p><p v-if="school.status === 'trial' && school.trial_ends_at" class="mt-1 text-sm font-semibold" :class="trialDaysLeft(school.trial_ends_at) <= 3 ? 'text-rose-600' : 'text-amber-600'">{{ trialDaysLeft(school.trial_ends_at) }} hari tersisa</p></div>
                 <div class="app-card p-5"><p class="text-sm text-slate-500">User</p><p class="mt-3 text-3xl font-bold text-ink dark:text-white">{{ school.users_count }}</p></div>
                 <div class="app-card p-5"><p class="text-sm text-slate-500">Siswa</p><p class="mt-3 text-3xl font-bold text-ink dark:text-white">{{ school.students_count }}</p></div>
             </div>
@@ -144,6 +159,25 @@ function resetPassword(school: School): void {
                     </div>
                 </section>
             </div>
+
+            <section class="app-card overflow-hidden">
+                <div class="border-b border-line p-5 dark:border-slate-800">
+                    <h2 class="font-bold text-slate-900 dark:text-slate-100">Aktivitas terbaru</h2>
+                    <p class="text-sm text-slate-500">Log perubahan status, reset password, dan aktivitas platform lainnya.</p>
+                </div>
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <div v-for="log in activityLogs" :key="log.id" class="p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-ink dark:text-white">{{ log.description }}</p>
+                                <p class="mt-1 text-sm text-slate-500">{{ log.performed_by }}</p>
+                            </div>
+                            <span class="shrink-0 text-xs text-slate-400">{{ formatDate(log.created_at) }}</span>
+                        </div>
+                    </div>
+                    <div v-if="!activityLogs.length" class="p-5 text-sm text-slate-500">Belum ada aktivitas.</div>
+                </div>
+            </section>
         </div>
     </AuthenticatedLayout>
 </template>

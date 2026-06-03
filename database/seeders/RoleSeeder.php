@@ -39,6 +39,9 @@ class RoleSeeder extends Seeder
             'character-points.view',
             'character-points.input',
             'character-points.manage-types',
+            'reports.print',
+            'guardians.view-dashboard',
+            'guardians.view-child-reports',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,6 +61,20 @@ class RoleSeeder extends Seeder
             ]);
 
             $role->syncPermissions($permissions);
+        });
+
+        $guardianPermissions = ['guardians.view-dashboard', 'guardians.view-child-reports'];
+
+        School::query()->each(function (School $school) use ($guardianPermissions): void {
+            setPermissionsTeamId($school->id);
+
+            $role = Role::query()->firstOrCreate([
+                'name' => 'wali-murid',
+                'guard_name' => 'web',
+                'school_id' => $school->id,
+            ]);
+
+            $role->syncPermissions($guardianPermissions);
         });
     }
 }
